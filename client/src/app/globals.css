@@ -31,3 +31,19 @@ body {
   background-color: var(--color-fb-gray-dark);
   border-radius: 20px;
 }
+
+/* Hide scrollbar by default, show on hover */
+.hover-scrollbar::-webkit-scrollbar-thumb {
+  background-color: transparent !important;
+}
+.hover-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: var(--color-fb-gray-dark) !important;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Search, Home, Users, Bell, MessageCircle, Menu, Grid } from "lucide-react";
+import { Search, Home, Users, Bell, MessageCircle, Menu, Grid, PlaySquare } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -18,7 +18,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-[56px] bg-white dark:bg-fb-dark-panel shadow-sm z-50 px-4 flex items-center justify-between">
+    <nav className="fixed top-0 left-0 right-0 h-[56px] bg-white  shadow-sm z-50 px-4 flex items-center justify-between">
       {/* Left section: Logo & Search */}
       <div className="flex items-center gap-2">
         <Link href="/" className="text-fb-blue hover:opacity-90">
@@ -27,24 +27,25 @@ export default function Navbar() {
             f
           </div>
         </Link>
-        <div className="hidden md:flex items-center bg-gray-100 dark:bg-fb-gray-bg-dark rounded-full px-3 py-2 w-64 ml-2">
+        <div className="hidden md:flex items-center bg-gray-100  rounded-full px-3 py-2 w-64 ml-2">
           <Search size={18} className="text-gray-500" />
           <input
             type="text"
             placeholder="Search Mini-Facebook"
-            className="bg-transparent border-none outline-none ml-2 w-full text-sm placeholder-gray-500 text-fb-text-dark dark:text-fb-text-light"
+            className="bg-transparent border-none outline-none ml-2 w-full text-sm placeholder-gray-500 text-fb-text-dark "
           />
         </div>
-        <div className="md:hidden w-10 h-10 bg-gray-100 dark:bg-fb-gray-bg-dark rounded-full flex items-center justify-center cursor-pointer">
-          <Search size={20} className="text-gray-500 dark:text-gray-300" />
+        <div className="md:hidden w-10 h-10 bg-gray-100  rounded-full flex items-center justify-center cursor-pointer">
+          <Search size={20} className="text-gray-500 " />
         </div>
       </div>
 
       {/* Center section: Navigation Icons */}
       <div className="hidden md:flex flex-1 justify-center max-w-2xl gap-2">
-        <NavItem icon={<Home size={28} />} active tooltip="Home" />
-        <NavItem icon={<Users size={28} />} tooltip="Friends" />
-        <NavItem icon={<Grid size={28} />} tooltip="Menu" />
+        <NavItem href="/" icon={<Home size={28} />} active tooltip="Home" />
+        <NavItem href="/video" icon={<PlaySquare size={28} />} tooltip="Video" />
+        <NavItem href="/friends" icon={<Users size={28} />} tooltip="Friends" />
+        <NavItem href="#" icon={<Grid size={28} />} tooltip="Menu" />
       </div>
 
       {/* Right section: User Actions */}
@@ -66,11 +67,11 @@ export default function Navbar() {
   );
 }
 
-function NavItem({ icon, active, tooltip }: { icon: React.ReactNode; active?: boolean; tooltip: string }) {
-  return (
+function NavItem({ icon, active, tooltip, href }: { icon: React.ReactNode; active?: boolean; tooltip: string; href?: string }) {
+  const content = (
     <div
       className={`px-8 py-2 rounded-lg cursor-pointer flex items-center justify-center transition-colors relative group
-        ${active ? "text-fb-blue" : "text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-fb-gray-bg-dark"}
+        ${active ? "text-fb-blue" : "text-gray-500 hover:bg-gray-100  :bg-fb-gray-bg-dark"}
       `}
     >
       {icon}
@@ -79,19 +80,24 @@ function NavItem({ icon, active, tooltip }: { icon: React.ReactNode; active?: bo
       )}
       
       {/* Tooltip */}
-      <div className="absolute top-12 bg-black text-white text-xs px-3 py-1.5 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap">
+      <div className="absolute top-12 bg-black text-white text-xs px-3 py-1.5 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
         {tooltip}
       </div>
     </div>
   );
+
+  if (href) {
+    return <Link href={href}>{content}</Link>;
+  }
+  return content;
 }
 
 function ActionButton({ icon, badge }: { icon: React.ReactNode; badge?: string }) {
   return (
-    <div className="w-10 h-10 bg-gray-200 hover:bg-gray-300 dark:bg-fb-gray-bg-dark dark:hover:bg-gray-600 rounded-full flex items-center justify-center cursor-pointer relative transition-colors text-black dark:text-white">
+    <div className="w-10 h-10 bg-gray-200 hover:bg-gray-300  :bg-gray-600 rounded-full flex items-center justify-center cursor-pointer relative transition-colors text-black ">
       {icon}
       {badge && (
-        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white dark:border-fb-dark-panel">
+        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white ">
           {badge}
         </div>
       )}

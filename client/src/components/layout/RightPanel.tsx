@@ -17,13 +17,13 @@ export default function RightPanel() {
       <div className="flex items-center justify-between mb-4 px-2">
         <h3 className="text-gray-500 font-semibold text-[17px]">Contacts</h3>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-fb-gray-bg-dark flex items-center justify-center cursor-pointer transition-colors text-gray-500">
+          <div className="w-8 h-8 rounded-full hover:bg-gray-200 :bg-fb-gray-bg-dark flex items-center justify-center cursor-pointer transition-colors text-gray-500">
             <Video size={18} />
           </div>
-          <div className="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-fb-gray-bg-dark flex items-center justify-center cursor-pointer transition-colors text-gray-500">
+          <div className="w-8 h-8 rounded-full hover:bg-gray-200 :bg-fb-gray-bg-dark flex items-center justify-center cursor-pointer transition-colors text-gray-500">
             <Search size={18} />
           </div>
-          <div className="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-fb-gray-bg-dark flex items-center justify-center cursor-pointer transition-colors text-gray-500">
+          <div className="w-8 h-8 rounded-full hover:bg-gray-200 :bg-fb-gray-bg-dark flex items-center justify-center cursor-pointer transition-colors text-gray-500">
             <MoreHorizontal size={18} />
           </div>
         </div>
@@ -32,11 +32,11 @@ export default function RightPanel() {
       <ul className="space-y-1">
         {friends.map((friend, index) => (
           <li key={index}>
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-fb-gray-bg-dark transition-colors cursor-pointer relative">
+            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 :bg-fb-gray-bg-dark transition-colors cursor-pointer relative">
               <div className="relative">
                 <img src={friend.avatar} alt={friend.name} className="w-9 h-9 rounded-full bg-gray-300" />
                 {friend.active && (
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-fb-dark-panel"></div>
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white "></div>
                 )}
               </div>
               <span className="font-medium text-[15px]">{friend.name}</span>
