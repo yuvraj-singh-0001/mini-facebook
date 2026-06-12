@@ -9,7 +9,7 @@ export default function FeedLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-full flex flex-col bg-fb-bg dark:bg-fb-dark-bg text-fb-text-dark dark:text-fb-text-light pt-[56px]">
+    <div className="min-h-full flex flex-col bg-fb-bg  text-fb-text-dark  pt-[56px]">
       <Navbar />
       <div className="flex w-full justify-center">
         <Sidebar />
