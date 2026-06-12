@@ -3,10 +3,28 @@
 import React from "react";
 import { Users, Bookmark, PlaySquare, Clock, Users2, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function Sidebar() {
+  const [user, setUser] = useState<{name: string, avatar: string} | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const u = JSON.parse(storedUser);
+      setUser({
+        name: `${u.firstName} ${u.lastName}`,
+        avatar: u.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
+      });
+    }
+  }, []);
+
   const sidebarLinks = [
-    { icon: <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" className="w-8 h-8 rounded-full" alt="User" />, title: "Yuvraj Singh", href: "/profile" },
+    { 
+      icon: <img src={user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} className="w-8 h-8 rounded-full object-cover" alt="User" />, 
+      title: user?.name || "Yuvraj Singh", 
+      href: "/profile" 
+    },
     { icon: <Users className="text-blue-500" size={28} />, title: "Friends", href: "/friends" },
     { icon: <Clock className="text-blue-500" size={28} />, title: "Memories", href: "/memories" },
     { icon: <Bookmark className="text-purple-500" size={28} />, title: "Saved", href: "/saved" },

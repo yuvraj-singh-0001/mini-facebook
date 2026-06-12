@@ -4,8 +4,19 @@ import React from "react";
 import { Search, Home, Users, Bell, MessageCircle, Menu, Grid } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
+  const [avatar, setAvatar] = useState("https://api.dicebear.com/7.x/avataaars/svg?seed=Felix");
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      if (user.avatar) setAvatar(user.avatar);
+    }
+  }, []);
+
   return (
     <nav className="fixed top-0 left-0 right-0 h-[56px] bg-white dark:bg-fb-dark-panel shadow-sm z-50 px-4 flex items-center justify-between">
       {/* Left section: Logo & Search */}
@@ -43,13 +54,13 @@ export default function Navbar() {
           <ActionButton icon={<MessageCircle size={20} />} />
           <ActionButton icon={<Bell size={20} />} badge="3" />
         </div>
-        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden cursor-pointer ml-2">
+        <Link href="/profile" className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden cursor-pointer ml-2 hover:opacity-90 transition-opacity block">
           <img
-            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+            src={avatar}
             alt="User profile"
             className="w-full h-full object-cover"
           />
-        </div>
+        </Link>
       </div>
     </nav>
   );
