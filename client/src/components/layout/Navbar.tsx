@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Search, Home, Users, Bell, MessageCircle, Menu, Grid, PlaySquare } from "lucide-react";
 import Link from "next/link";
 import { useSocket } from '@/components/providers/SocketProvider';
+import { usePathname } from 'next/navigation';
 
 // Helper for dynamic Facebook-like relative time
 const formatFacebookTime = (dateString: string) => {
@@ -45,6 +46,7 @@ export default function Navbar() {
   const [friendRequestsCount, setFriendRequestsCount] = useState(0);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const { socket } = useSocket();
+  const pathname = usePathname();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -178,10 +180,10 @@ export default function Navbar() {
 
         {/* Center section: Navigation Icons Desktop */}
         <div className="hidden md:flex flex-1 justify-center max-w-2xl gap-2">
-          <NavItem href="/" onClick={() => { if (window.location.pathname === '/') { window.scrollTo({ top: 0, behavior: 'smooth' }); } }} icon={<Home size={28} />} active tooltip="Home" />
-          <NavItem href="/video" icon={<PlaySquare size={28} />} tooltip="Video" />
-          <NavItem href="/friends" icon={<Users size={28} />} tooltip="Friends" badge={friendRequestsCount > 0 ? friendRequestsCount : undefined} />
-          <NavItem href="#" icon={<Grid size={28} />} tooltip="Menu" />
+          <NavItem href="/" onClick={() => { if (pathname === '/') { window.scrollTo({ top: 0, behavior: 'smooth' }); } }} icon={<Home size={28} />} active={pathname === '/'} tooltip="Home" />
+          <NavItem href="/video" icon={<PlaySquare size={28} />} active={pathname === '/video'} tooltip="Video" />
+          <NavItem href="/friends" icon={<Users size={28} />} active={pathname === '/friends'} tooltip="Friends" badge={friendRequestsCount > 0 ? friendRequestsCount : undefined} />
+          <NavItem href="#" icon={<Grid size={28} />} active={pathname === '/menu'} tooltip="Menu" />
         </div>
 
         {/* Right section: User Actions */}
@@ -264,11 +266,11 @@ export default function Navbar() {
 
       {/* Mobile Tab Bar */}
       <div className="md:hidden h-[48px] border-t border-gray-200 flex items-center justify-between px-1 w-full bg-white">
-        <NavItemMobile href="/" onClick={() => { if (window.location.pathname === '/') { window.scrollTo({ top: 0, behavior: 'smooth' }); } }} icon={<Home size={26} />} active />
-        <NavItemMobile href="/video" icon={<PlaySquare size={26} />} />
-        <NavItemMobile href="/friends" icon={<Users size={26} />} badge={friendRequestsCount > 0 ? friendRequestsCount : undefined} />
-        <NavItemMobile href="#" icon={<Bell size={26} />} badge={unreadCount > 0 ? unreadCount : undefined} />
-        <NavItemMobile href="/profile" icon={<Menu size={26} />} />
+        <NavItemMobile href="/" onClick={() => { if (pathname === '/') { window.scrollTo({ top: 0, behavior: 'smooth' }); } }} icon={<Home size={26} />} active={pathname === '/'} />
+        <NavItemMobile href="/video" icon={<PlaySquare size={26} />} active={pathname === '/video'} />
+        <NavItemMobile href="/friends" icon={<Users size={26} />} active={pathname === '/friends'} badge={friendRequestsCount > 0 ? friendRequestsCount : undefined} />
+        <NavItemMobile href="#" icon={<Bell size={26} />} active={pathname === '/notifications'} badge={unreadCount > 0 ? unreadCount : undefined} />
+        <NavItemMobile href="/profile" icon={<Menu size={26} />} active={pathname === '/profile'} />
       </div>
     </nav>
   );
