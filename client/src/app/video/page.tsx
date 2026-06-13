@@ -104,7 +104,7 @@ export default function VideoFeedPage() {
       {REELS.map((reel, index) => (
         <div key={index} className="h-full w-full snap-start relative flex justify-center bg-black">
           {/* Video Container */}
-          <div className="relative w-full max-w-[500px] h-full flex flex-col justify-center items-center overflow-hidden">
+          <div className="relative w-full max-w-[400px] xl:max-w-[420px] h-full flex flex-col justify-center items-center overflow-hidden md:aspect-[9/16] bg-black md:h-[95%] md:my-auto md:rounded-2xl">
             
             {/* Native Video Player */}
             <video
@@ -114,11 +114,11 @@ export default function VideoFeedPage() {
               muted={isMuted}
               playsInline
               onClick={toggleMute}
-              className="absolute inset-0 w-full h-full object-cover md:h-[90%] md:my-auto md:rounded-2xl pointer-events-auto cursor-pointer shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+              className="absolute inset-0 w-full h-full object-cover pointer-events-auto cursor-pointer shadow-[0_0_20px_rgba(0,0,0,0.5)]"
             />
             
             {/* Overlay UI - Premium Glassmorphism */}
-            <div className="absolute bottom-0 left-0 right-0 p-5 pb-20 md:pb-8 flex justify-between items-end bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none z-10 md:h-[90%] md:my-auto md:rounded-b-2xl md:rounded-t-none">
+            <div className="absolute bottom-0 left-0 right-0 p-5 pb-20 md:pb-8 flex justify-between items-end bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none z-10">
               
               {/* Left Info */}
               <div className="text-white flex-1 pr-12 mb-2 animate-fade-in-up">
@@ -167,16 +167,16 @@ export default function VideoFeedPage() {
                    <img src={`https://api.dicebear.com/7.x/identicon/svg?seed=${reel.channel}`} alt="audio" className="w-full h-full object-cover scale-150" />
                 </div>
               </div>
-
-              {/* Mute Toggle UI - Premium Floating Icon */}
-              <div 
-                className="absolute top-6 right-5 bg-black/40 backdrop-blur-xl border border-white/20 p-2.5 rounded-full cursor-pointer pointer-events-auto z-20 hover:bg-black/60 hover:scale-110 transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
-                onClick={toggleMute}
-              >
-                {isMuted ? <VolumeX size={22} className="text-white drop-shadow-md" /> : <Volume2 size={22} className="text-white drop-shadow-md" />}
-              </div>
-
             </div>
+            
+            {/* Mute Toggle UI - Premium Floating Icon */}
+            <div 
+              className="absolute top-6 right-5 bg-black/40 backdrop-blur-xl border border-white/20 p-2.5 rounded-full cursor-pointer pointer-events-auto z-20 hover:bg-black/60 hover:scale-110 transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
+              onClick={toggleMute}
+            >
+              {isMuted ? <VolumeX size={22} className="text-white drop-shadow-md" /> : <Volume2 size={22} className="text-white drop-shadow-md" />}
+            </div>
+
           </div>
         </div>
       ))}
