@@ -67,10 +67,11 @@ export default function CreatePostComponent({ currentUser, onPostCreated }: { cu
         <div className="flex-1 bg-[#f0f2f5] hover:bg-[#e4e6eb] rounded-full px-4 py-2 flex items-center transition-colors">
           <input 
             type="text" 
-            placeholder={`What's on your mind, ${currentUser?.firstName}?`}
+            placeholder={currentUser?.firstName ? `What's on your mind, ${currentUser.firstName}?` : "What's on your mind?"}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="bg-transparent border-none outline-none w-full text-[17px] text-black"
+            suppressHydrationWarning
           />
         </div>
       </div>
@@ -92,6 +93,7 @@ export default function CreatePostComponent({ currentUser, onPostCreated }: { cu
           onClick={handlePost} 
           disabled={loading}
           className="w-full bg-[#1877f2] hover:bg-[#166fe5] text-white font-bold py-2 rounded-md mb-3 disabled:opacity-50"
+          suppressHydrationWarning
         >
           {loading ? 'Posting...' : 'Post'}
         </button>
@@ -100,7 +102,7 @@ export default function CreatePostComponent({ currentUser, onPostCreated }: { cu
       <div className="border-t border-[#ced0d4] mb-3 w-full"></div>
       
       <div className="flex justify-between">
-        <button className="flex-1 flex items-center justify-center gap-2 p-2 hover:bg-[#f0f2f5] rounded-lg transition-colors text-[#65676B] font-semibold">
+        <button suppressHydrationWarning className="flex-1 flex items-center justify-center gap-2 p-2 hover:bg-[#f0f2f5] rounded-lg transition-colors text-[#65676B] font-semibold">
           <span className="text-red-500"><Video size={24} /></span>
           <span className="hidden sm:inline">Live video</span>
         </button>
@@ -109,7 +111,7 @@ export default function CreatePostComponent({ currentUser, onPostCreated }: { cu
           Photo/video
           <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
         </label>
-        <button className="flex-1 flex items-center justify-center gap-2 p-2 hover:bg-[#f0f2f5] rounded-lg transition-colors text-[#65676B] font-semibold">
+        <button suppressHydrationWarning className="flex-1 flex items-center justify-center gap-2 p-2 hover:bg-[#f0f2f5] rounded-lg transition-colors text-[#65676B] font-semibold">
           <span className="text-yellow-500"><Smile size={24} /></span>
           <span className="hidden sm:inline">Feeling/activity</span>
         </button>

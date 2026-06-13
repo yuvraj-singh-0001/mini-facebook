@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Search, Home, Users, Bell, MessageCircle, Menu, Grid, PlaySquare } from "lucide-react";
 import Link from "next/link";
+import { useSocket } from '@/components/providers/SocketProvider';
 
 // Helper for dynamic Facebook-like relative time
 const formatFacebookTime = (dateString: string) => {
@@ -42,6 +43,8 @@ export default function Navbar() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [friendRequestsCount, setFriendRequestsCount] = useState(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const { socket } = useSocket();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -50,8 +53,38 @@ export default function Navbar() {
       if (user.avatar) setAvatar(user.avatar);
       fetchNotifications();
       fetchFriendRequests();
+      fetchUnreadMessages();
     }
   }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handleUpdate = () => fetchUnreadMessages();
+    socket.on('receive_message', handleUpdate);
+    socket.on('messages_seen_update', handleUpdate);
+    window.addEventListener('messages_read', handleUpdate);
+    
+    return () => {
+      socket.off('receive_message', handleUpdate);
+      socket.off('messages_seen_update', handleUpdate);
+      window.removeEventListener('messages_read', handleUpdate);
+    };
+  }, [socket]);
+
+  const fetchUnreadMessages = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:5002/api/chat/unread-count", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUnreadMessagesCount(data.unreadCount || 0);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const fetchNotifications = async () => {
     try {
@@ -158,15 +191,22 @@ export default function Navbar() {
             <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer text-black">
               <Search size={20} />
             </div>
-            <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer text-black">
+            <Link href="/messages" className="relative w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer text-black hover:bg-gray-200">
               <MessageCircle size={20} />
-            </div>
+              {unreadMessagesCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
+                  {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                </span>
+              )}
+            </Link>
           </div>
 
           {/* Desktop Right Icons */}
           <div className="hidden md:flex sm:items-center gap-2">
             <ActionButton icon={<Menu size={20} />} />
-            <ActionButton icon={<MessageCircle size={20} />} />
+            <Link href="/messages">
+              <ActionButton icon={<MessageCircle size={20} />} badge={unreadMessagesCount > 0 ? (unreadMessagesCount > 9 ? '9+' : unreadMessagesCount.toString()) : undefined} />
+            </Link>
             
             {/* Notifications Section */}
             <div className="relative">
