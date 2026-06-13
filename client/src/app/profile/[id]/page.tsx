@@ -160,7 +160,7 @@ export default function DynamicProfilePage() {
                     Unfriend
                   </button>
                 )}
-                <button className="bg-[#e4e6eb] hover:bg-[#d8dadf] text-black  px-3 py-1.5 rounded-md font-semibold text-[15px] flex items-center gap-1.5 transition-colors">
+                <button onClick={() => router.push(`/messages?userId=${id}`)} className="bg-[#e4e6eb] hover:bg-[#d8dadf] text-black  px-3 py-1.5 rounded-md font-semibold text-[15px] flex items-center gap-1.5 transition-colors">
                   <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=messenger" className="w-5 h-5" alt="msg" />
                   Message
                 </button>

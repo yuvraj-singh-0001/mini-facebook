@@ -52,7 +52,7 @@ export default function RightPanel() {
         ) : (
           friends.map((friend) => (
             <li key={friend.id}>
-              <Link href={`/profile/${friend.id}`}>
+              <Link href={`/messages?userId=${friend.id}`}>
                 <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer relative">
                   <div className="relative">
                     <img src={friend.avatar} alt={friend.name} className="w-9 h-9 rounded-full object-cover border border-gray-200" />
