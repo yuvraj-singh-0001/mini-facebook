@@ -11,6 +11,18 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    // Check if deactivated
+    if (user.isDeactivated) {
+      if (user.deactivatedUntil && new Date() < new Date(user.deactivatedUntil)) {
+        return res.status(403).json({ 
+          message: `Your account is temporarily suspended until ${new Date(user.deactivatedUntil).toLocaleString()} due to policy violations.`
+        });
+      } else if (user.deactivatedUntil && new Date() >= new Date(user.deactivatedUntil)) {
+        // Ban expired, remove it in DB but let them log in
+        await User.findByIdAndUpdate(user._id, { isDeactivated: false, deactivatedUntil: null });
+      }
+    }
+
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
