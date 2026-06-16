@@ -38,7 +38,9 @@ const userSchema = new mongoose.Schema({
   relationshipStatus: { type: String, default: '' },
   isOnline: { type: Boolean, default: false },
   lastSeen: { type: Date, default: Date.now },
-  blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  isDeactivated: { type: Boolean, default: false },
+  deactivatedUntil: { type: Date }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

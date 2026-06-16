@@ -35,6 +35,9 @@ interface Message {
   isDeletedForEveryone: boolean;
   isEdited: boolean;
   createdAt: string;
+  isProfanityError?: boolean;
+  profanityWarning?: string;
+  profanityCategories?: string[];
 }
 
 interface Conversation {
@@ -439,6 +442,37 @@ function ChatContent() {
               unreadCount: 0
             }, ...prev];
           });
+        } else if (response.status === 'profanity_error') {
+          const categoryString = response.caughtCategories && response.caughtCategories.length > 0
+            ? `[${response.caughtCategories.join(', ')}] `
+            : '';
+            
+          const fakeMsg: Message = {
+            _id: Date.now().toString(),
+            sender: currentUser._id,
+            receiver: activeFriend._id,
+            content: msgData.content, // capture the attempted message
+            type: 'text',
+            status: 'sent',
+            isDeletedForMe: [],
+            isDeletedForEveryone: false,
+            isEdited: false,
+            createdAt: new Date().toISOString(),
+            isProfanityError: true,
+            profanityCategories: response.caughtCategories,
+            profanityWarning: response.isDeactivated 
+              ? 'Account deactivated for 24 hours.'
+              : `Message blocked due to ${categoryString}content. Warning: Repeated offenses lead to a 24-hour ban.`
+          };
+          setMessages(prev => [...prev, fakeMsg]);
+          
+          if (response.isDeactivated) {
+            setTimeout(() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              window.location.href = '/login';
+            }, 3000);
+          }
         } else {
           console.error("Server error sending message:", response?.error);
         }
@@ -672,9 +706,11 @@ function ChatContent() {
                     
                     <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} max-w-[70%] sm:max-w-[60%]`}>
                       <div className={`relative px-3 py-2 text-[15px] shadow-sm
-                        ${isMine 
-                          ? 'bg-[#0084ff] text-white rounded-[18px] rounded-br-[4px]' 
-                          : 'bg-white text-gray-900 rounded-[18px] rounded-bl-[4px] border border-gray-100'}`}
+                        ${msg.isProfanityError 
+                          ? 'bg-red-50 text-red-600 rounded-[18px] rounded-br-[4px] border border-red-300 font-medium'
+                          : isMine 
+                            ? 'bg-[#0084ff] text-white rounded-[18px] rounded-br-[4px]' 
+                            : 'bg-white text-gray-900 rounded-[18px] rounded-bl-[4px] border border-gray-100'}`}
                       >
                         {msg.type === 'image' && msg.imageUrl ? (
                           <img src={msg.imageUrl} alt="attached" className="rounded-lg max-w-full max-h-[300px] cursor-pointer hover:opacity-95 transition-opacity" />
@@ -699,7 +735,7 @@ function ChatContent() {
                       <div className={`flex items-center gap-1 mt-0.5 px-1 text-[11px] ${isMine ? 'text-gray-500' : 'text-gray-400'}`}>
                         <span>{formatMsgTime(msg.createdAt)}</span>
                         {msg.isEdited && <span className="italic">· edited</span>}
-                        {isMine && (
+                        {isMine && !msg.isProfanityError && (
                           <span className="flex items-center ml-0.5">
                             {msg.status === 'sent' && <span title="Sent"><Check className="w-3.5 h-3.5 text-gray-400" /></span>}
                             {msg.status === 'delivered' && <span title="Delivered"><CheckCheck className="w-3.5 h-3.5 text-gray-400" /></span>}
@@ -707,6 +743,12 @@ function ChatContent() {
                           </span>
                         )}
                       </div>
+                      
+                      {msg.isProfanityError && (
+                        <div className="text-red-500 text-[12px] font-bold mt-1 w-full text-right px-1 leading-tight">
+                          ⚠️ {msg.profanityWarning}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

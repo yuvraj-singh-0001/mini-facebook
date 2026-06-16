@@ -1,6 +1,8 @@
 const { Server } = require('socket.io');
 const Message = require('./models/Message');
 const User = require('./models/User');
+const BadWord = require('./models/BadWord');
+const ModerationLog = require('./models/ModerationLog');
 
 const setupSocket = (server) => {
   const io = new Server(server, {
@@ -31,6 +33,64 @@ const setupSocket = (server) => {
     socket.on('send_message', async (data, callback) => {
       try {
         const { sender, receiver, content, type, imageUrl } = data;
+        
+        if (type === 'text' && content) {
+          const badWordsData = await BadWord.find({});
+          
+          const lowerContent = content.toLowerCase();
+          // Remove ALL non-alphanumeric characters (spaces, symbols, emojis, etc.) but keep letters from all languages
+          const normalizedContent = lowerContent.replace(/[^\p{L}\p{N}]/gu, '');
+          
+          const caughtWords = [];
+          const caughtCategories = [];
+          
+          badWordsData.forEach(bw => {
+            const word = bw.word.toLowerCase();
+            const normalizedWord = word.replace(/[^\p{L}\p{N}]/gu, '');
+            const regex = new RegExp(`\\b${word}\\b`, 'i');
+            // Match exact word boundaries OR match anywhere in the stripped string
+            if (regex.test(lowerContent) || normalizedContent.includes(normalizedWord)) {
+              caughtWords.push(word);
+              if (!caughtCategories.includes(bw.category)) {
+                caughtCategories.push(bw.category);
+              }
+            }
+          });
+          
+          if (caughtWords.length > 0) {
+            await ModerationLog.create({
+              userId: sender,
+              attemptedMessage: content,
+              caughtWords,
+              caughtCategories
+            });
+            
+            const offenseCount = await ModerationLog.countDocuments({ userId: sender });
+            let isDeactivated = false;
+            
+            if (offenseCount > 3) {
+              const until = new Date();
+              until.setHours(until.getHours() + 24);
+              await User.findByIdAndUpdate(sender, {
+                isDeactivated: true,
+                deactivatedUntil: until
+              });
+              isDeactivated = true;
+            }
+            
+            if (callback) {
+              return callback({ 
+                status: 'profanity_error', 
+                error: 'Message blocked due to profanity.',
+                caughtWords,
+                caughtCategories,
+                isDeactivated
+              });
+            }
+            return;
+          }
+        }
+
         
         // Save to DB
         const newMessage = new Message({

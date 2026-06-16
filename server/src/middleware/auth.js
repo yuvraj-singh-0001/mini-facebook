@@ -11,7 +11,7 @@ const authMiddleware = async (req, res, next) => {
     token = req.headers.authorization.split(' ')[1];
   }
 
-  if (!token) {
+  if (!token || token === 'null' || token === 'undefined') {
     return res.status(401).json({ message: 'Not authorized, no token provided' });
   }
 
@@ -21,6 +21,20 @@ const authMiddleware = async (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ message: 'Not authorized, user not found' });
     }
+    
+    if (req.user.isDeactivated) {
+      if (req.user.deactivatedUntil && new Date() < new Date(req.user.deactivatedUntil)) {
+        return res.status(403).json({ 
+          message: 'Account deactivated due to policy violations.',
+          deactivatedUntil: req.user.deactivatedUntil
+        });
+      } else if (req.user.deactivatedUntil && new Date() >= new Date(req.user.deactivatedUntil)) {
+        // Ban expired, reactivate
+        await User.findByIdAndUpdate(req.user._id, { isDeactivated: false, deactivatedUntil: null });
+        req.user.isDeactivated = false;
+      }
+    }
+    
     next();
   } catch (error) {
     console.error(error);
