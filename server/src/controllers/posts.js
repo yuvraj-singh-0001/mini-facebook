@@ -5,17 +5,21 @@ const Comment = require('../models/Comment');
 
 exports.createPost = async (req, res) => {
   try {
-    const { content, image } = req.body;
+    const { content, image, video, mediaType } = req.body;
     const userId = req.user._id;
 
-    if (!content && !image) {
-      return res.status(400).json({ message: 'Post must have text or image' });
+    if (!content && !image && !video) {
+      return res.status(400).json({ message: 'Post must have text, image, or video' });
     }
 
     const newPost = new Post({
       user: userId,
       content,
-      image
+      image,
+      video,
+      mediaType: mediaType || (video ? 'reel' : 'post'),
+      viewedBy: [userId],
+      viewsCount: 1
     });
 
     await newPost.save();
@@ -39,7 +43,7 @@ exports.createPost = async (req, res) => {
         sender: userId,
         type: 'post',
         referenceId: newPost._id,
-        message: `${user.firstName} ${user.lastName} just posted: ${content ? content.substring(0, 30) + (content.length > 30 ? '...' : '') : 'A new photo.'}`
+        message: video || mediaType === 'reel' ? `${user.firstName} ${user.lastName} shared a new Reel 🎬!` : `${user.firstName} ${user.lastName} just posted: ${content ? content.substring(0, 30) + (content.length > 30 ? '...' : '') : 'A new photo.'}`
       }));
       
       // Bulk insert for high performance scalability
@@ -92,11 +96,13 @@ exports.getFeed = async (req, res) => {
 
     const formattedPosts = posts.map(post => {
       const commentCount = comments.find(c => c._id.toString() === post._id.toString())?.count || 0;
+      const realViews = post.viewedBy ? post.viewedBy.length : 0;
       return {
         ...post,
         commentsCount: commentCount,
         hasLiked: post.likes.some(id => id.toString() === userId.toString()),
-        likesCount: post.likes.length
+        likesCount: post.likes.length,
+        viewsCount: realViews
       };
     });
 
@@ -131,11 +137,13 @@ exports.getUserPosts = async (req, res) => {
 
     const formattedPosts = posts.map(post => {
       const commentCount = comments.find(c => c._id.toString() === post._id.toString())?.count || 0;
+      const realViews = post.viewedBy ? post.viewedBy.length : 0;
       return {
         ...post,
         commentsCount: commentCount,
         hasLiked: post.likes.some(id => id.toString() === currentUserId.toString()),
-        likesCount: post.likes.length
+        likesCount: post.likes.length,
+        viewsCount: realViews
       };
     });
 
@@ -211,3 +219,87 @@ exports.sharePost = async (req, res) => {
     res.status(500).json({ message: 'Server error sharing post' });
   }
 };
+
+exports.viewPost = async (req, res) => {
+  try {
+    const postId = req.params.postId;
+    const userId = req.user._id;
+    const post = await Post.findById(postId);
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    const hasViewed = post.viewedBy && post.viewedBy.some(id => id.toString() === userId.toString());
+    if (!hasViewed) {
+      post.viewedBy = post.viewedBy || [];
+      post.viewedBy.push(userId);
+      post.viewsCount = post.viewedBy.length;
+      await post.save();
+    } else {
+      post.viewsCount = post.viewedBy ? post.viewedBy.length : 0;
+      if (post.isModified('viewsCount')) await post.save();
+    }
+
+    res.status(200).json({ message: 'View recorded', viewsCount: post.viewedBy ? post.viewedBy.length : 0 });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error recording view' });
+  }
+};
+
+exports.getReels = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    // Single optimized query: filter + sort + paginate + populate in MongoDB
+    // Exclude heavy base64 fields from initial fetch for speed
+    const reels = await Post.find({
+      $or: [
+        { mediaType: { $in: ['reel', 'video'] } },
+        { video: { $exists: true, $ne: '' } }
+      ]
+    })
+      .select('-viewedBy') // Don't load the full viewedBy array - saves memory/bandwidth
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('user', 'firstName lastName avatar isOnline')
+      .lean();
+
+    if (reels.length === 0) {
+      return res.status(200).json({ reels: [] });
+    }
+
+    // Run comment count aggregation only for fetched reels (not ALL reels)
+    const reelIds = reels.map(r => r._id);
+    const comments = await Comment.aggregate([
+      { $match: { post: { $in: reelIds } } },
+      { $group: { _id: '$post', count: { $sum: 1 } } }
+    ]);
+
+    // Build a fast lookup map instead of .find() per reel
+    const commentMap = {};
+    comments.forEach(c => { commentMap[c._id.toString()] = c.count; });
+
+    const enrichedReels = reels.map(reel => {
+      const likesCount = reel.likes?.length || 0;
+      return {
+        ...reel,
+        commentsCount: commentMap[reel._id.toString()] || 0,
+        hasLiked: reel.likes?.some(id => id.toString() === userId.toString()) || false,
+        likesCount,
+        viewsCount: reel.viewsCount || 0
+      };
+    });
+
+    res.status(200).json({ reels: enrichedReels });
+  } catch (error) {
+    console.error('Error fetching reels:', error);
+    res.status(500).json({ message: 'Server error fetching reels feed' });
+  }
+};
+
+
+
+

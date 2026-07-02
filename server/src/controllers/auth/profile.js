@@ -34,11 +34,14 @@ exports.updateProfilePicture = async (req, res) => {
 
 exports.updateProfileDetails = async (req, res) => {
   try {
-    const { bio, workplace, education, location, hometown, relationshipStatus } = req.body;
+    const { bio, workplace, education, location, hometown, relationshipStatus, isPublicProfile } = req.body;
+
+    const updateData = { bio, workplace, education, location, hometown, relationshipStatus };
+    if (typeof isPublicProfile !== 'undefined') updateData.isPublicProfile = isPublicProfile;
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
-      { bio, workplace, education, location, hometown, relationshipStatus },
+      updateData,
       { returnDocument: 'after' }
     ).select('-password');
 
@@ -56,6 +59,7 @@ exports.updateProfileDetails = async (req, res) => {
         location: updatedUser.location,
         hometown: updatedUser.hometown,
         relationshipStatus: updatedUser.relationshipStatus,
+        isPublicProfile: updatedUser.isPublicProfile,
         createdAt: updatedUser.createdAt
       }
     });
@@ -63,5 +67,38 @@ exports.updateProfileDetails = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error updating profile details' });
+  }
+};
+
+exports.togglePublicProfile = async (req, res) => {
+  try {
+    const { isPublicProfile } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { isPublicProfile },
+      { returnDocument: 'after' }
+    ).select('-password');
+
+    res.status(200).json({
+      message: 'Profile mode updated successfully',
+      user: {
+        id: updatedUser._id,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        emailOrPhone: updatedUser.emailOrPhone,
+        avatar: updatedUser.avatar,
+        bio: updatedUser.bio,
+        workplace: updatedUser.workplace,
+        education: updatedUser.education,
+        location: updatedUser.location,
+        hometown: updatedUser.hometown,
+        relationshipStatus: updatedUser.relationshipStatus,
+        isPublicProfile: updatedUser.isPublicProfile,
+        createdAt: updatedUser.createdAt
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error toggling public mode' });
   }
 };

@@ -47,6 +47,7 @@ exports.login = async (req, res) => {
         location: user.location,
         hometown: user.hometown,
         relationshipStatus: user.relationshipStatus,
+        isPublicProfile: user.isPublicProfile || false,
         createdAt: user.createdAt
       }
     });

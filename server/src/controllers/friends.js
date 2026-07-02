@@ -161,6 +161,7 @@ exports.unfriend = async (req, res) => {
 // Get Friends List
 exports.getFriendsList = async (req, res) => {
   try {
+    const currentUserId = req.user._id;
     const targetUserId = req.params.userId;
 
     const friendships = await Friendship.find({
@@ -168,17 +169,30 @@ exports.getFriendsList = async (req, res) => {
       status: 'accepted'
     }).populate('requester recipient', 'firstName lastName avatar emailOrPhone isOnline lastSeen').lean();
 
+    // If viewing someone else's friend list, check which of those friends the requester is actually friends with
+    let currentUserFriendIds = new Set();
+    if (currentUserId.toString() !== targetUserId.toString()) {
+      const myFriendships = await Friendship.find({
+        $or: [{ requester: currentUserId }, { recipient: currentUserId }],
+        status: 'accepted'
+      }).select('requester recipient').lean();
+      myFriendships.forEach(f => {
+        currentUserFriendIds.add(f.requester.toString() === currentUserId.toString() ? f.recipient.toString() : f.requester.toString());
+      });
+    }
+
     const friendsList = friendships.map(f => {
       // Determine which one is the friend
       const friend = f.requester._id.toString() === targetUserId.toString() ? f.recipient : f.requester;
+      const isMyFriend = currentUserId.toString() === targetUserId.toString() || currentUserFriendIds.has(friend._id.toString());
       return {
         id: friend._id,
         firstName: friend.firstName,
         lastName: friend.lastName,
         name: `${friend.firstName} ${friend.lastName}`,
         avatar: friend.avatar,
-        isOnline: friend.isOnline,
-        lastSeen: friend.lastSeen
+        isOnline: isMyFriend ? (friend.isOnline || false) : false,
+        lastSeen: isMyFriend ? friend.lastSeen : null
       };
     });
 
@@ -265,14 +279,26 @@ exports.getPendingRequests = async (req, res) => {
   }
 };
 
-// Get All Users (for testing / discovering friends)
+// Get All Users (for testing / discovering friends / searching)
 exports.getAllUsers = async (req, res) => {
   try {
     const currentUserId = req.user._id;
+    const search = req.query.search || req.query.q;
 
-    // Get all users except current user
-    const users = await User.find({ _id: { $ne: currentUserId } })
-      .select('firstName lastName avatar')
+    const query = { _id: { $ne: currentUserId } };
+
+    if (search && search.trim() !== '') {
+      const terms = search.trim().split(/\s+/);
+      const termRegexes = terms.map(t => new RegExp(t, 'i'));
+      query.$and = termRegexes.map(regex => ({
+        $or: [{ firstName: regex }, { lastName: regex }]
+      }));
+    }
+
+    // Get all users except current user (limited to 20 if searching, else 100)
+    const users = await User.find(query)
+      .select('firstName lastName avatar isOnline lastSeen isPublicProfile')
+      .limit(search ? 20 : 100)
       .lean();
 
     // Optionally attach relationship status to each user
@@ -299,6 +325,9 @@ exports.getAllUsers = async (req, res) => {
         lastName: u.lastName,
         name: `${u.firstName} ${u.lastName}`,
         avatar: u.avatar,
+        isOnline: status === 'friends' ? (u.isOnline || false) : false,
+        lastSeen: status === 'friends' ? u.lastSeen : null,
+        isPublicProfile: u.isPublicProfile || false,
         status
       };
     });
@@ -352,7 +381,10 @@ exports.getUserProfile = async (req, res) => {
         location: targetUser.location,
         hometown: targetUser.hometown,
         relationshipStatus: targetUser.relationshipStatus,
+        isPublicProfile: targetUser.isPublicProfile || false,
         createdAt: targetUser.createdAt,
+        isOnline: (status === 'friends' || status === 'self') ? (targetUser.isOnline || false) : false,
+        lastSeen: (status === 'friends' || status === 'self') ? targetUser.lastSeen : null,
         status
       }
     });

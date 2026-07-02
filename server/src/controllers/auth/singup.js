@@ -49,6 +49,7 @@ exports.signup = async (req, res) => {
         location: newUser.location,
         hometown: newUser.hometown,
         relationshipStatus: newUser.relationshipStatus,
+        isPublicProfile: newUser.isPublicProfile || false,
         createdAt: newUser.createdAt
       }
     });
