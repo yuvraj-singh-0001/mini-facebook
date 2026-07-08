@@ -202,14 +202,14 @@ export default function PostComponent({ post: initialPost, currentUser, isProfil
       {/* Image */}
       {post.image && (
         <div className="rounded-lg overflow-hidden border border-gray-200 -mx-4 mb-3 max-h-[600px] flex items-center justify-center bg-black">
-          <img src={post.image} alt="Post content" className="w-full max-h-[600px] object-contain" />
+          <img src={post.image} alt="Post content" loading="lazy" decoding="async" className="w-full max-h-[600px] object-contain" />
         </div>
       )}
 
       {/* Video / Reel */}
       {post.video && (
         <div className="rounded-lg overflow-hidden border border-gray-200 -mx-4 mb-3 max-h-[600px] flex items-center justify-center bg-black relative">
-          <video src={post.video} controls className="w-full max-h-[600px] object-contain" />
+          <video src={post.video} controls preload="metadata" playsInline className="w-full max-h-[600px] object-contain" />
         </div>
       )}
       

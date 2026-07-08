@@ -7,6 +7,24 @@ import Navbar from "@/components/layout/Navbar";
 // Only user uploaded Reels will be displayed
 
 
+const REELS_CACHE_KEY = 'fb_reels_cache';
+
+function formatReels(rawReels: any[]) {
+  return rawReels.map((r: any) => ({
+    _id: r._id,
+    url: r.video || r.image || "https://www.w3schools.com/html/mov_bbb.mp4",
+    title: r.content || "Facebook Reel 🎬",
+    channel: r.user ? `${r.user.firstName} ${r.user.lastName}` : "@User",
+    avatar: r.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${r.user?._id || 'default'}`,
+    likes: r.likesCount || 0,
+    hasLiked: r.hasLiked || false,
+    comments: r.commentsCount || 0,
+    shares: r.sharesCount || 0,
+    viewsCount: r.viewsCount || 0,
+    isReal: true
+  }));
+}
+
 export default function VideoFeedPage() {
   const [activeReel, setActiveReel] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
@@ -24,6 +42,19 @@ export default function VideoFeedPage() {
   const commentsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Show cached reels instantly
+    try {
+      const cached = localStorage.getItem(REELS_CACHE_KEY);
+      if (cached) {
+        const cachedReels = JSON.parse(cached);
+        if (cachedReels.length > 0) {
+          setReels(cachedReels);
+          setLoading(false);
+        }
+      }
+    } catch {}
+
+    // Fetch fresh reels in background
     const fetchReels = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -33,20 +64,12 @@ export default function VideoFeedPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.reels && data.reels.length > 0) {
-            const formattedBackendReels = data.reels.map((r: any) => ({
-              _id: r._id,
-              url: r.video || r.image || "https://www.w3schools.com/html/mov_bbb.mp4",
-              title: r.content || "Facebook Reel 🎬",
-              channel: r.user ? `${r.user.firstName} ${r.user.lastName}` : "@User",
-              avatar: r.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${r.user?._id || 'default'}`,
-              likes: r.likesCount || 0,
-              hasLiked: r.hasLiked || false,
-              comments: r.commentsCount || 0,
-              shares: r.sharesCount || 0,
-              viewsCount: r.viewsCount || 0,
-              isReal: true
-            }));
-            setReels(formattedBackendReels);
+            const formatted = formatReels(data.reels);
+            setReels(formatted);
+            // Cache for next visit (without video blob data, just URLs)
+            try {
+              localStorage.setItem(REELS_CACHE_KEY, JSON.stringify(formatted.slice(0, 15)));
+            } catch {}
           } else {
             setReels([]);
           }
@@ -242,19 +265,20 @@ export default function VideoFeedPage() {
               
               {/* Ambient Blurred Background for non-9:16 videos */}
               <video 
-                src={reel.url}
-                preload="metadata"
+                src={index === activeReel ? reel.url : undefined}
+                preload="none"
+                muted
                 className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-125 pointer-events-none" 
               />
               
               {/* Main Native Video Player */}
               <video
                 ref={(el) => { videoRefs.current[index] = el; }}
-                src={reel.url}
+                src={Math.abs(index - activeReel) <= 2 ? reel.url : undefined}
                 loop
                 muted={isMuted}
                 playsInline
-                preload="auto"
+                preload={index === activeReel ? "auto" : Math.abs(index - activeReel) <= 1 ? "metadata" : "none"}
                 onClick={toggleMute}
                 className="relative z-[5] w-full h-full object-cover pointer-events-auto cursor-pointer"
               />

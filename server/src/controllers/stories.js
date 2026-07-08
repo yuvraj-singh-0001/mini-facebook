@@ -1,5 +1,6 @@
 const Story = require('../models/Story');
 const Friendship = require('../models/Friendship');
+const { getCachedFriendIds } = require('./posts');
 
 exports.createStory = async (req, res) => {
   try {
@@ -30,21 +31,13 @@ exports.getFeedStories = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // Get friends
-    const friendships = await Friendship.find({
-      $or: [{ requester: userId }, { recipient: userId }],
-      status: 'accepted'
-    }).lean();
-
-    const friendIds = friendships.map(f => 
-      f.requester.toString() === userId.toString() ? f.recipient : f.requester
-    );
-    
-    friendIds.push(userId); // Include own stories
+    // Get friends from cache (avoids separate MongoDB roundtrip)
+    const friendIds = await getCachedFriendIds(userId);
+    const storyUserIds = [...friendIds, userId];
 
     // Only get stories that haven't expired
     const activeStories = await Story.find({
-      user: { $in: friendIds },
+      user: { $in: storyUserIds },
       expiresAt: { $gt: new Date() }
     })
     .sort({ createdAt: 1 }) // oldest active first per user looks better in story viewer, but we group them anyway

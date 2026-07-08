@@ -3,6 +3,30 @@ const Friendship = require('../models/Friendship');
 const Notification = require('../models/Notification');
 const Comment = require('../models/Comment');
 
+// Friendship cache — friendships change very rarely, no need to re-query on every scroll
+const friendsCache = new Map(); // key: userId, value: { friendIds, expiresAt }
+const FRIENDS_CACHE_TTL = 10 * 1000; // 10 seconds
+
+async function getCachedFriendIds(userId) {
+  const key = userId.toString();
+  const cached = friendsCache.get(key);
+  if (cached && Date.now() < cached.expiresAt) {
+    return cached.friendIds;
+  }
+
+  const friendships = await Friendship.find({
+    $or: [{ requester: userId }, { recipient: userId }],
+    status: 'accepted'
+  }).select('requester recipient').lean();
+
+  const friendIds = friendships.map(f =>
+    f.requester.toString() === key ? f.recipient : f.requester
+  );
+
+  friendsCache.set(key, { friendIds, expiresAt: Date.now() + FRIENDS_CACHE_TTL });
+  return friendIds;
+}
+
 exports.createPost = async (req, res) => {
   try {
     const { content, image, video, mediaType } = req.body;
@@ -67,46 +91,51 @@ exports.getFeed = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // Get friends
-    const friendships = await Friendship.find({
-      $or: [{ requester: userId }, { recipient: userId }],
-      status: 'accepted'
-    }).lean();
-
-    const friendIds = friendships.map(f => 
-      f.requester.toString() === userId.toString() ? f.recipient : f.requester
-    );
+    // Get friends (cached for 10s to avoid repeat queries on pagination)
+    const friendIds = await getCachedFriendIds(userId);
     
     // Include user's own posts in the feed
-    friendIds.push(userId);
+    const feedUserIds = [...friendIds, userId];
 
-    const posts = await Post.find({ user: { $in: friendIds } })
+    // Fetch posts — exclude viewedBy AND likes array (we only need hasLiked + count)
+    const posts = await Post.find({ user: { $in: feedUserIds } })
+      .select('-viewedBy')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit)
+      .limit(limit + 1)
       .populate('user', 'firstName lastName avatar')
       .lean();
 
-    // Get comments count for each post
-    const postIds = posts.map(p => p._id);
+    const hasMore = posts.length > limit;
+    const postsPage = hasMore ? posts.slice(0, limit) : posts;
+
+    // Get comments count in parallel
+    const postIds = postsPage.map(p => p._id);
     const comments = await Comment.aggregate([
       { $match: { post: { $in: postIds } } },
       { $group: { _id: '$post', count: { $sum: 1 } } }
     ]);
 
-    const formattedPosts = posts.map(post => {
-      const commentCount = comments.find(c => c._id.toString() === post._id.toString())?.count || 0;
-      const realViews = post.viewedBy ? post.viewedBy.length : 0;
+    // Build fast lookup map
+    const commentMap = {};
+    comments.forEach(c => { commentMap[c._id.toString()] = c.count; });
+
+    const formattedPosts = postsPage.map(post => {
+      const { likes, ...rest } = post; // Strip likes array from response
       return {
-        ...post,
-        commentsCount: commentCount,
-        hasLiked: post.likes.some(id => id.toString() === userId.toString()),
-        likesCount: post.likes.length,
-        viewsCount: realViews
+        ...rest,
+        commentsCount: commentMap[post._id.toString()] || 0,
+        hasLiked: likes.some(id => id.toString() === userId.toString()),
+        likesCount: likes.length,
+        viewsCount: post.viewsCount || 0
       };
     });
 
-    res.status(200).json({ posts: formattedPosts });
+    res.status(200).json({ 
+      posts: formattedPosts, 
+      hasMore,
+      page
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error fetching feed' });
@@ -122,6 +151,7 @@ exports.getUserPosts = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const posts = await Post.find({ user: targetUserId })
+      .select('-viewedBy')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -135,15 +165,17 @@ exports.getUserPosts = async (req, res) => {
       { $group: { _id: '$post', count: { $sum: 1 } } }
     ]);
 
+    const commentMap = {};
+    comments.forEach(c => { commentMap[c._id.toString()] = c.count; });
+
     const formattedPosts = posts.map(post => {
-      const commentCount = comments.find(c => c._id.toString() === post._id.toString())?.count || 0;
-      const realViews = post.viewedBy ? post.viewedBy.length : 0;
+      const { likes, ...rest } = post;
       return {
-        ...post,
-        commentsCount: commentCount,
-        hasLiked: post.likes.some(id => id.toString() === currentUserId.toString()),
-        likesCount: post.likes.length,
-        viewsCount: realViews
+        ...rest,
+        commentsCount: commentMap[post._id.toString()] || 0,
+        hasLiked: likes.some(id => id.toString() === currentUserId.toString()),
+        likesCount: likes.length,
+        viewsCount: post.viewsCount || 0
       };
     });
 
@@ -283,11 +315,12 @@ exports.getReels = async (req, res) => {
     comments.forEach(c => { commentMap[c._id.toString()] = c.count; });
 
     const enrichedReels = reels.map(reel => {
-      const likesCount = reel.likes?.length || 0;
+      const { likes, ...rest } = reel;
+      const likesCount = likes?.length || 0;
       return {
-        ...reel,
+        ...rest,
         commentsCount: commentMap[reel._id.toString()] || 0,
-        hasLiked: reel.likes?.some(id => id.toString() === userId.toString()) || false,
+        hasLiked: likes?.some(id => id.toString() === userId.toString()) || false,
         likesCount,
         viewsCount: reel.viewsCount || 0
       };
@@ -299,6 +332,8 @@ exports.getReels = async (req, res) => {
     res.status(500).json({ message: 'Server error fetching reels feed' });
   }
 };
+
+exports.getCachedFriendIds = getCachedFriendIds;
 
 
 

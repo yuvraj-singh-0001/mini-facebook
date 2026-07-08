@@ -59,9 +59,14 @@ export default function Navbar() {
     if (storedUser) {
       const user = JSON.parse(storedUser);
       if (user.avatar) setAvatar(user.avatar);
-      fetchNotifications();
-      fetchFriendRequests();
-      fetchUnreadMessages();
+      // Delay non-critical navbar API calls — run AFTER feed & stories finish
+      // Run sequentially so they don't compete with each other
+      const timer = setTimeout(async () => {
+        await fetchNotifications();
+        await fetchFriendRequests();
+        await fetchUnreadMessages();
+      }, 4000);
+      return () => clearTimeout(timer);
     }
   }, []);
 
@@ -100,13 +105,13 @@ export default function Navbar() {
       const res = await fetch("http://localhost:5002/api/notifications", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const data = await res.json();
       if (res.ok) {
+        const data = await res.json();
         setNotifications(data.notifications || []);
         setUnreadCount(data.unreadCount || 0);
       }
     } catch (error) {
-      console.error(error);
+      // Ignore transient network errors during server restarts
     }
   };
 
@@ -116,12 +121,14 @@ export default function Navbar() {
       const res = await fetch("http://localhost:5002/api/friends/requests", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const data = await res.json();
-      if (res.ok && data.requests) {
-        setFriendRequestsCount(data.requests.length);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.requests) {
+          setFriendRequestsCount(data.requests.length);
+        }
       }
     } catch (error) {
-      console.error(error);
+      // Ignore transient network errors during server restarts
     }
   };
 

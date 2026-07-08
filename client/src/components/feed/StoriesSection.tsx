@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react';
 import CreateStoryModal from '@/components/feed/CreateStoryModal';
 import StoryViewerModal from '@/components/feed/StoryViewerModal';
 
-export default function StoriesSection({ currentUser }: { currentUser: any }) {
+export default function StoriesSection({ currentUser, ready = true }: { currentUser: any; ready?: boolean }) {
   const [storyGroups, setStoryGroups] = useState<any[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [activeViewerGroupIndex, setActiveViewerGroupIndex] = useState<number | null>(null);
@@ -24,8 +24,11 @@ export default function StoriesSection({ currentUser }: { currentUser: any }) {
   };
 
   useEffect(() => {
-    fetchStories();
-  }, []);
+    // Only fetch when parent says ready (feed loaded first)
+    if (ready) {
+      fetchStories();
+    }
+  }, [ready]);
 
   const openViewer = (index: number) => {
     setActiveViewerGroupIndex(index);

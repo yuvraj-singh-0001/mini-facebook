@@ -35,7 +35,16 @@ server.listen(PORT, () => {
 // (MongoDB Atlas connection)
 const BadWord = require('./src/models/BadWord');
 
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI, {
+  maxPoolSize: 20,
+  minPoolSize: 5,
+  socketTimeoutMS: 60000,
+  connectTimeoutMS: 30000,
+  serverSelectionTimeoutMS: 10000,
+  heartbeatFrequencyMS: 10000,
+  retryWrites: true,
+  retryReads: true,
+})
   .then(async () => {
     console.log('Connected to MongoDB');
     
