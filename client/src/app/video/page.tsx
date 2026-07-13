@@ -236,7 +236,7 @@ export default function VideoFeedPage() {
         <div className="h-full w-full flex items-center justify-center bg-black text-white">
           <div className="flex flex-col items-center gap-3">
             <div className="w-10 h-10 border-4 border-[#1877f2] border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-gray-400 font-semibold">Loading Facebook Reels...</p>
+            <p className="text-gray-400 font-semibold">Loading Reels...</p>
           </div>
         </div>
       ) : reels.length === 0 ? (

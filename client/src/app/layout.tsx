@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SocketProvider } from "@/components/providers/SocketProvider";
 import { AuthGuard } from "@/components/providers/AuthGuard";
+import { GlobalDailyTimeLimit } from "@/components/common/GlobalDailyTimeLimit";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -114,6 +115,7 @@ export default function RootLayout({
         <AuthGuard>
           <SocketProvider>
             {children}
+            <GlobalDailyTimeLimit />
           </SocketProvider>
         </AuthGuard>
       </body>
