@@ -2,17 +2,42 @@
 
 import React, { useState, useEffect } from 'react';
 import { Clock, RotateCcw, AlertTriangle, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 const MAX_APP_SECONDS = 900; // 15 minutes total daily limit
 const STORAGE_DATE_KEY = 'vaaknow_app_usage_date';
 const STORAGE_SECONDS_KEY = 'vaaknow_app_usage_seconds';
 
 export function GlobalDailyTimeLimit() {
+  const pathname = usePathname();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [secondsUsed, setSecondsUsed] = useState<number>(0);
   const [showLimitModal, setShowLimitModal] = useState<boolean>(false);
   const [minimized, setMinimized] = useState<boolean>(false);
 
   useEffect(() => {
+    const checkAuth = () => {
+      try {
+        const token = localStorage.getItem('token');
+        const isAuthPage = pathname === '/login' || pathname === '/signup';
+        const validAuth = Boolean(token && !isAuthPage);
+        setIsLoggedIn(validAuth);
+        if (!validAuth) {
+          setShowLimitModal(false);
+        }
+      } catch {
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkAuth();
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
     // Load stored usage for today
     try {
       const today = new Date().toDateString();
@@ -33,6 +58,15 @@ export function GlobalDailyTimeLimit() {
     } catch {}
 
     const interval = setInterval(() => {
+      try {
+        const token = localStorage.getItem('token');
+        const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/signup';
+        if (!token || isAuthPage) {
+          setIsLoggedIn(false);
+          return;
+        }
+      } catch {}
+
       if (document.visibilityState === 'visible') {
         setSecondsUsed((prev) => {
           if (prev >= MAX_APP_SECONDS) {
@@ -52,7 +86,7 @@ export function GlobalDailyTimeLimit() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isLoggedIn]);
 
   // Pause all playing media elements when limit is reached
   useEffect(() => {
@@ -70,6 +104,10 @@ export function GlobalDailyTimeLimit() {
     setSecondsUsed(0);
     setShowLimitModal(false);
   };
+
+  if (!isLoggedIn) {
+    return null;
+  }
 
   const remainingSeconds = Math.max(0, MAX_APP_SECONDS - secondsUsed);
 
