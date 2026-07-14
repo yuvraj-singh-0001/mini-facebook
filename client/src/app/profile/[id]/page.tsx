@@ -6,6 +6,7 @@ import { Camera, Plus, PenSquare, ChevronDown, MoreHorizontal, Image as ImageIco
 import PostComponent from "@/components/feed/PostComponent";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { API_URL } from "@/config/api";
 
 const formatViewCount = (count: number = 0) => {
   if (count >= 1000000) return `${(count / 1000000).toFixed(1).replace('.0', '')}M`;
@@ -41,7 +42,7 @@ export default function DynamicProfilePage() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5002/api/users/${id}`, {
+      const res = await fetch(`${API_URL}/api/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -53,7 +54,7 @@ export default function DynamicProfilePage() {
         }
         setUser(data.user);
         
-        const mutualRes = await fetch(`http://localhost:5002/api/friends/mutual/${id}`, {
+        const mutualRes = await fetch(`${API_URL}/api/friends/mutual/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const mutualData = await mutualRes.json();
@@ -69,7 +70,7 @@ export default function DynamicProfilePage() {
   const fetchUserFriends = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5002/api/friends/list/${id}`, {
+      const res = await fetch(`${API_URL}/api/friends/list/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -84,7 +85,7 @@ export default function DynamicProfilePage() {
   const fetchUserPosts = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5002/api/posts/user/${id}`, {
+      const res = await fetch(`${API_URL}/api/posts/user/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -99,7 +100,7 @@ export default function DynamicProfilePage() {
   const handleAction = async (endpoint: string, method: string) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5002/api/friends/${endpoint}/${id}`, {
+      const res = await fetch(`${API_URL}/api/friends/${endpoint}/${id}`, {
         method,
         headers: { Authorization: `Bearer ${token}` }
       });

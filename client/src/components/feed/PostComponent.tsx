@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MoreHorizontal, ThumbsUp, MessageCircle, Share2, Send } from 'lucide-react';
 import ShareModal from './ShareModal';
+import { API_URL } from '@/config/api';
 
 interface PostProps {
   post: any;
@@ -65,7 +66,7 @@ export default function PostComponent({ post: initialPost, currentUser, isProfil
       if (!sessionStorage.getItem(viewedKey)) {
         sessionStorage.setItem(viewedKey, 'true');
         const token = localStorage.getItem('token');
-        fetch(`http://localhost:5002/api/posts/${post._id}/view`, {
+        fetch(`${API_URL}/api/posts/${post._id}/view`, {
           method: 'PUT',
           headers: { Authorization: `Bearer ${token}` }
         })
@@ -94,7 +95,7 @@ export default function PostComponent({ post: initialPost, currentUser, isProfil
 
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:5002/api/posts/${post._id}/like`, {
+      await fetch(`${API_URL}/api/posts/${post._id}/like`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -114,7 +115,7 @@ export default function PostComponent({ post: initialPost, currentUser, isProfil
   const handleShare = async () => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:5002/api/posts/${post._id}/share`, {
+      await fetch(`${API_URL}/api/posts/${post._id}/share`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -127,7 +128,7 @@ export default function PostComponent({ post: initialPost, currentUser, isProfil
   const loadComments = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5002/api/posts/${post._id}/comments`, {
+      const res = await fetch(`${API_URL}/api/posts/${post._id}/comments`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -150,7 +151,7 @@ export default function PostComponent({ post: initialPost, currentUser, isProfil
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5002/api/posts/${post._id}/comments`, {
+      const res = await fetch(`${API_URL}/api/posts/${post._id}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

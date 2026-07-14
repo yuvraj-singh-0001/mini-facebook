@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { UserPlus, Check, X, Users as UsersIcon } from "lucide-react";
+import { API_URL } from "@/config/api";
 
 export default function FriendsPage() {
   const [activeTab, setActiveTab] = useState("friends");
@@ -20,10 +21,10 @@ export default function FriendsPage() {
       if (!token) return;
 
       const [reqRes, usersRes] = await Promise.all([
-        fetch("http://localhost:5002/api/friends/requests", {
+        fetch(`${API_URL}/api/friends/requests`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch("http://localhost:5002/api/users", {
+        fetch(`${API_URL}/api/users`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -43,7 +44,7 @@ export default function FriendsPage() {
   const handleAction = async (action: string, userId: string, endpoint: string, method: string) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5002/api/friends/${endpoint}/${userId}`, {
+      const res = await fetch(`${API_URL}/api/friends/${endpoint}/${userId}`, {
         method,
         headers: { Authorization: `Bearer ${token}` }
       });

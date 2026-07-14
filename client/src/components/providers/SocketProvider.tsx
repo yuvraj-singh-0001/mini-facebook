@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import toast, { Toaster } from 'react-hot-toast';
+import { API_URL } from '@/config/api';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -29,7 +30,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const user = JSON.parse(userStr);
     const userId = user.id || user._id;
 
-    const socketInstance = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002');
+    const socketInstance = io(API_URL);
 
     socketInstance.on('connect', () => {
       setIsConnected(true);

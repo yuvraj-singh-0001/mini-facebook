@@ -7,6 +7,7 @@ import EditProfileModal from "@/components/profile/EditProfileModal";
 import CreatePostComponent from "@/components/feed/CreatePostComponent";
 import PostComponent from "@/components/feed/PostComponent";
 import Link from "next/link";
+import { API_URL } from "@/config/api";
 
 const formatViewCount = (count: number = 0) => {
   if (count >= 1000000) return `${(count / 1000000).toFixed(1).replace('.0', '')}M`;
@@ -40,7 +41,7 @@ export default function ProfilePage() {
   const fetchFriends = async (userId: string) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5002/api/friends/list/${userId}`, {
+      const res = await fetch(`${API_URL}/api/friends/list/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -55,7 +56,7 @@ export default function ProfilePage() {
   const fetchUserPosts = async (userId: string) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5002/api/posts/user/${userId}`, {
+      const res = await fetch(`${API_URL}/api/posts/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -78,7 +79,7 @@ export default function ProfilePage() {
       const base64String = reader.result as string;
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`http://localhost:5002/api/auth/profile-picture`, {
+        const res = await fetch(`${API_URL}/api/auth/profile-picture`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -102,7 +103,7 @@ export default function ProfilePage() {
   const handleTogglePublicMode = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5002/api/auth/profile/public-mode", {
+      const res = await fetch(`${API_URL}/api/auth/profile/public-mode`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { X, Camera } from "lucide-react";
+import { API_URL } from "@/config/api";
 
 interface EditProfileModalProps {
   user: any;
@@ -43,7 +44,7 @@ export default function EditProfileModal({ user, onClose, onSave }: EditProfileM
       const token = localStorage.getItem("token");
       
       // Update details
-      const detailsRes = await fetch("http://localhost:5002/api/auth/profile", {
+      const detailsRes = await fetch(`${API_URL}/api/auth/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -58,7 +59,7 @@ export default function EditProfileModal({ user, onClose, onSave }: EditProfileM
 
       // Update avatar if changed
       if (profileImage && profileImage !== user?.avatar) {
-        const avatarRes = await fetch("http://localhost:5002/api/auth/profile-picture", {
+        const avatarRes = await fetch(`${API_URL}/api/auth/profile-picture`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",

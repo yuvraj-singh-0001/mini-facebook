@@ -5,6 +5,7 @@ import CreatePostComponent from "@/components/feed/CreatePostComponent";
 import PostComponent from "@/components/feed/PostComponent";
 import StoriesSection from "@/components/feed/StoriesSection";
 import { useRouter } from "next/navigation";
+import { API_URL } from "@/config/api";
 
 const CACHE_KEY = "fb_feed_cache";
 const PAGE_SIZE = 10;
@@ -115,7 +116,7 @@ export default function MainFeedPage() {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `http://localhost:5002/api/posts/feed?page=${pageNum}&limit=${PAGE_SIZE}`,
+        `${API_URL}/api/posts/feed?page=${pageNum}&limit=${PAGE_SIZE}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search } from 'lucide-react';
+import { API_URL } from '@/config/api';
 
 export default function ShareModal({ postId, onClose, onShareSuccess }: { postId: string, onClose: () => void, onShareSuccess: () => void }) {
   const [friends, setFriends] = useState<any[]>([]);
@@ -18,7 +19,7 @@ export default function ShareModal({ postId, onClose, onShareSuccess }: { postId
       const user = JSON.parse(storedUser);
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`http://localhost:5002/api/friends/list/${user.id || user._id}`, {
+      const res = await fetch(`${API_URL}/api/friends/list/${user.id || user._id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -37,7 +38,7 @@ export default function ShareModal({ postId, onClose, onShareSuccess }: { postId
     
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5002/api/posts/${postId}/share`, {
+      const res = await fetch(`${API_URL}/api/posts/${postId}/share`, {
         method: "PUT",
         headers: { 
           Authorization: `Bearer ${token}`,

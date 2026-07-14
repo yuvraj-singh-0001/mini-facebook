@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Eye, Heart } from 'lucide-react';
+import { API_URL } from '@/config/api';
 
 export default function StoryStatsModal({ storyId, onClose }: { storyId: string, onClose: () => void }) {
   const [stats, setStats] = useState<any>(null);
@@ -13,7 +14,7 @@ export default function StoryStatsModal({ storyId, onClose }: { storyId: string,
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5002/api/stories/${storyId}/stats`, {
+      const res = await fetch(`${API_URL}/api/stories/${storyId}/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Heart, MessageCircle, Share2, MoreVertical, Music, Volume2, VolumeX, X, Send } from 'lucide-react';
 import Navbar from "@/components/layout/Navbar";
+import { API_URL } from "@/config/api";
 
 // Only user uploaded Reels will be displayed
 
@@ -58,7 +59,7 @@ export default function VideoFeedPage() {
     const fetchReels = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:5002/api/posts/reels', {
+        const res = await fetch(`${API_URL}/api/posts/reels`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.ok) {
@@ -131,7 +132,7 @@ export default function VideoFeedPage() {
       return r;
     }));
     try {
-      await fetch(`http://localhost:5002/api/posts/${reelId}/like`, {
+      await fetch(`${API_URL}/api/posts/${reelId}/like`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -158,7 +159,7 @@ export default function VideoFeedPage() {
     setCommentLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5002/api/posts/${reelId}/comments`, {
+      const res = await fetch(`${API_URL}/api/posts/${reelId}/comments`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -178,7 +179,7 @@ export default function VideoFeedPage() {
     setPostingComment(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5002/api/posts/${commentOpen}/comments`, {
+      const res = await fetch(`${API_URL}/api/posts/${commentOpen}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

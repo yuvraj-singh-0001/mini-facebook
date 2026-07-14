@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import CreateStoryModal from '@/components/feed/CreateStoryModal';
 import StoryViewerModal from '@/components/feed/StoryViewerModal';
+import { API_URL } from '@/config/api';
 
 export default function StoriesSection({ currentUser, ready = true }: { currentUser: any; ready?: boolean }) {
   const [storyGroups, setStoryGroups] = useState<any[]>([]);
@@ -11,7 +12,7 @@ export default function StoriesSection({ currentUser, ready = true }: { currentU
   const fetchStories = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5002/api/stories/feed', {
+      const res = await fetch(`${API_URL}/api/stories/feed`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();

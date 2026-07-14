@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { X, Eye, EyeOff, User, Camera } from "lucide-react";
+import { API_URL } from "@/config/api";
 
 export default function Signup() {
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -133,7 +134,7 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5002/api/auth/signup", {
+      const response = await fetch(`${API_URL}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -175,7 +176,7 @@ export default function Signup() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5002/api/auth/profile-picture", {
+      const response = await fetch(`${API_URL}/api/auth/profile-picture`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

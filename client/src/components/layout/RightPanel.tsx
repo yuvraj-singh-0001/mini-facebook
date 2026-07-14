@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Search, MoreHorizontal, Video } from "lucide-react";
 import Link from "next/link";
+import { API_URL } from "@/config/api";
 
 const formatFacebookTime = (dateString: string) => {
   if (!dateString) return '';
@@ -32,7 +33,7 @@ export default function RightPanel() {
         const user = JSON.parse(storedUser);
         const token = localStorage.getItem("token");
 
-        const res = await fetch(`http://localhost:5002/api/friends/list/${user.id || user._id}`, {
+        const res = await fetch(`${API_URL}/api/friends/list/${user.id || user._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();

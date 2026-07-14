@@ -11,6 +11,7 @@ import {
 import EmojiPicker from 'emoji-picker-react';
 import Navbar from '@/components/layout/Navbar';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { API_URL } from '@/config/api';
 
 // Types
 interface User {
@@ -46,7 +47,6 @@ interface Conversation {
   unreadCount: number;
 }
 
-const API_URL = 'http://localhost:5002';
 
 function ChatContent() {
   const { socket, isConnected } = useSocket();

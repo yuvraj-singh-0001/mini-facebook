@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, ChevronLeft, ChevronRight, Heart, Eye } from 'lucide-react';
 import StoryStatsModal from './StoryStatsModal';
+import { API_URL } from '@/config/api';
 
 // Helper for dynamic Facebook-like relative time
 const formatFacebookTime = (dateString: string) => {
@@ -54,7 +55,7 @@ export default function StoryViewerModal({ storyGroups, initialGroupIndex, curre
     // View tracking (only call once per story, don't await)
     if (!isOwnStory) {
       const token = localStorage.getItem('token');
-      fetch(`http://localhost:5002/api/stories/${currentStory._id}/view`, {
+      fetch(`${API_URL}/api/stories/${currentStory._id}/view`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
       }).catch(console.error);
@@ -116,7 +117,7 @@ export default function StoryViewerModal({ storyGroups, initialGroupIndex, curre
     
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:5002/api/stories/${currentStory._id}/like`, {
+      await fetch(`${API_URL}/api/stories/${currentStory._id}/like`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
       });

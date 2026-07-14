@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Image as ImageIcon, Video, Smile, Film, Link as LinkIcon, X } from 'lucide-react';
+import { API_URL } from '@/config/api';
 
 export default function CreatePostComponent({ currentUser, onPostCreated }: { currentUser: any, onPostCreated: () => void }) {
   const [content, setContent] = useState('');
@@ -49,7 +50,7 @@ export default function CreatePostComponent({ currentUser, onPostCreated }: { cu
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5002/api/posts', {
+      const res = await fetch(`${API_URL}/api/posts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

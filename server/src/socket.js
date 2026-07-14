@@ -8,8 +8,9 @@ const setupSocket = (server) => {
   const io = new Server(server, {
     maxHttpBufferSize: 5e7, // 50 MB to allow high quality images
     cors: {
-      origin: '*', // Adjust in production
-      methods: ['GET', 'POST']
+      origin: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      credentials: true
     }
   });
 

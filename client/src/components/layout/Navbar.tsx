@@ -5,6 +5,7 @@ import { Search, Home, Users, Bell, MessageCircle, Menu, Grid, PlaySquare } from
 import Link from "next/link";
 import { useSocket } from '@/components/providers/SocketProvider';
 import { usePathname } from 'next/navigation';
+import { API_URL } from '@/config/api';
 
 // Helper for dynamic Facebook-like relative time
 const formatFacebookTime = (dateString: string) => {
@@ -87,7 +88,7 @@ export default function Navbar() {
   const fetchUnreadMessages = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5002/api/chat/unread-count", {
+      const res = await fetch(`${API_URL}/api/chat/unread-count`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -102,7 +103,7 @@ export default function Navbar() {
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5002/api/notifications", {
+      const res = await fetch(`${API_URL}/api/notifications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -118,7 +119,7 @@ export default function Navbar() {
   const fetchFriendRequests = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5002/api/friends/requests", {
+      const res = await fetch(`${API_URL}/api/friends/requests`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -137,7 +138,7 @@ export default function Navbar() {
     if (!isNotificationsOpen && unreadCount > 0) {
       try {
         const token = localStorage.getItem("token");
-        await fetch("http://localhost:5002/api/notifications/read", {
+        await fetch(`${API_URL}/api/notifications/read`, {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -151,7 +152,7 @@ export default function Navbar() {
   const handleClearNotifications = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5002/api/notifications/clear", {
+      const res = await fetch(`${API_URL}/api/notifications/clear`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -176,7 +177,7 @@ export default function Navbar() {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
-        const res = await fetch(`http://localhost:5002/api/users?search=${encodeURIComponent(searchQuery)}`, {
+        const res = await fetch(`${API_URL}/api/users?search=${encodeURIComponent(searchQuery)}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();

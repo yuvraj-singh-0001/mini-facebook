@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Image as ImageIcon } from 'lucide-react';
+import { API_URL } from '@/config/api';
 
 export default function CreateStoryModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) {
   const [image, setImage] = useState<string>('');
@@ -22,7 +23,7 @@ export default function CreateStoryModal({ onClose, onSuccess }: { onClose: () =
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5002/api/stories', {
+      const res = await fetch(`${API_URL}/api/stories`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
