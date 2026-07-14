@@ -266,7 +266,7 @@ export default function Navbar() {
       )}
     </div>
   );
-
+// ty
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 flex flex-col">
       <div className="h-[56px] px-4 flex items-center justify-between">
