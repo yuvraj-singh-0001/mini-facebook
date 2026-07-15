@@ -42,14 +42,20 @@ exports.sendRequest = async (req, res) => {
 
     await newRequest.save();
 
-    // Create notification
-    const senderUser = await User.findById(requesterId).lean();
-    await new Notification({
-      recipient: recipientId,
-      sender: requesterId,
-      type: 'friend_request',
-      message: `${senderUser.firstName} ${senderUser.lastName} sent you a friend request.`
-    }).save();
+    // Create notification (non-blocking — don't fail the whole request if this errors)
+    try {
+      const senderUser = await User.findById(requesterId).lean();
+      if (senderUser) {
+        await new Notification({
+          recipient: recipientId,
+          sender: requesterId,
+          type: 'friend_request',
+          message: `${senderUser.firstName} ${senderUser.lastName} sent you a friend request.`
+        }).save();
+      }
+    } catch (notifErr) {
+      console.error('Notification creation failed (non-fatal):', notifErr.message);
+    }
 
     res.status(200).json({ message: 'Friend request sent successfully' });
   } catch (error) {
@@ -74,14 +80,20 @@ exports.acceptRequest = async (req, res) => {
       return res.status(404).json({ message: 'Friend request not found' });
     }
 
-    // Create notification
-    const senderUser = await User.findById(recipientId).lean();
-    await new Notification({
-      recipient: requesterId,
-      sender: recipientId,
-      type: 'friend_request',
-      message: `${senderUser.firstName} ${senderUser.lastName} accepted your friend request.`
-    }).save();
+    // Create notification (non-blocking)
+    try {
+      const senderUser = await User.findById(recipientId).lean();
+      if (senderUser) {
+        await new Notification({
+          recipient: requesterId,
+          sender: recipientId,
+          type: 'friend_request',
+          message: `${senderUser.firstName} ${senderUser.lastName} accepted your friend request.`
+        }).save();
+      }
+    } catch (notifErr) {
+      console.error('Notification creation failed (non-fatal):', notifErr.message);
+    }
 
     res.status(200).json({ message: 'Friend request accepted' });
   } catch (error) {

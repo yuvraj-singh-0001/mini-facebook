@@ -146,9 +146,6 @@ export default function FriendsPage() {
       } else {
         // Rollback optimistic update on failure
         fetchData();
-        toast.error("Something went wrong. Try again.", {
-          style: { borderRadius: "12px" },
-        });
       }
     } catch (error) {
       fetchData();

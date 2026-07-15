@@ -135,12 +135,11 @@ export default function DynamicProfilePage() {
         } else if (endpoint === 'cancel') {
           toast(`Request cancelled`, { icon: "✕", style: { background: "#e4e6eb", color: "#050505", fontWeight: "600", borderRadius: "12px", padding: "12px 18px" }, duration: 2000, position: "bottom-center" });
         } else if (endpoint === 'unfriend') {
-          toast(`${userName} removed from friends`, { icon: "👋", style: { background: "#e4e6eb", color: "#050505", fontWeight: "600", borderRadius: "12px", padding: "12px 18px" }, duration: 2000, position: "bottom-center" });
+          toast(`${userName} removed from friends`, { icon: "", style: { background: "#e4e6eb", color: "#050505", fontWeight: "600", borderRadius: "12px", padding: "12px 18px" }, duration: 2000, position: "bottom-center" });
         }
       } else {
         // Rollback on failure
         fetchProfile();
-        toast.error("Something went wrong. Try again.", { style: { borderRadius: "12px" } });
       }
     } catch (error) {
       fetchProfile();
