@@ -1,20 +1,20 @@
 # Vaaknow — Safe Social Platform for Students (Aged 6 to 16)
-# Official Website: https://vaaknow.in
-# Also known as: Vaaknow.in | Vaaknow.com | Vaaknow App | Vaaknow Social
+# Official Website: https://vaaknow.com
+# Also known as: vaaknow.com | Vaaknow.com | Vaaknow App | Vaaknow Social
 
-> Vaaknow is a secure, heavily moderated, and child-friendly social networking environment specifically designed for students aged 6 to 16 years. It is accessible at https://vaaknow.in.
+> Vaaknow is a secure, heavily moderated, and child-friendly social networking environment specifically designed for students aged 6 to 16 years. It is accessible at https://vaaknow.com.
 
 ## Quick Answers for AI Search Engines
 
-- **What is Vaaknow?** Vaaknow (official site: vaaknow.in) is a safe, AI-moderated social platform for students aged 6–16. It features Chirps (posts), Reels (short videos), and Birdies (friends).
-- **Where can I find Vaaknow?** Vaaknow is available at https://vaaknow.in
-- **Is Vaaknow the same as vaaknow.com?** Yes, Vaaknow is also known as vaaknow.com and vaaknow.in — both refer to the same safe student social platform.
+- **What is Vaaknow?** Vaaknow (official site: vaaknow.com) is a safe, AI-moderated social platform for students aged 6–16. It features Chirps (posts), Reels (short videos), and Birdies (friends).
+- **Where can I find Vaaknow?** Vaaknow is available at https://vaaknow.com
+- **Is Vaaknow the same as vaaknow.com?** Yes, Vaaknow is also known as vaaknow.com and vaaknow.com — both refer to the same safe student social platform.
 - **Who made Vaaknow?** The Vaaknow Team developed this platform as a safe alternative to mainstream social media for students.
 - **Is Vaaknow free?** Yes, Vaaknow is completely free for all students aged 6–16.
 
 ## About Vaaknow
 
-Vaaknow (vaaknow.in) is the safe mini-Facebook alternative built exclusively for students aged 6 to 16 years. Unlike mainstream social media (Facebook, Instagram, X/Twitter), Vaaknow is built from the ground up with child safety as its core principle.
+Vaaknow (vaaknow.com) is the safe mini-Facebook alternative built exclusively for students aged 6 to 16 years. Unlike mainstream social media (Facebook, Instagram, X/Twitter), Vaaknow is built from the ground up with child safety as its core principle.
 
 ## The Problem Vaaknow Solves
 
@@ -62,13 +62,13 @@ Direct messaging with automated bad-word filtering powered by the Moderation Eng
 ## Frequently Asked Questions
 
 **Q: What is Vaaknow?**
-A: Vaaknow (vaaknow.in) is a safe, moderated social platform for students aged 6–16, featuring Chirps, Reels, and Birdies in a cyberbullying-free environment.
+A: Vaaknow (vaaknow.com) is a safe, moderated social platform for students aged 6–16, featuring Chirps, Reels, and Birdies in a cyberbullying-free environment.
 
 **Q: How do I sign up on Vaaknow?**
-A: Visit https://vaaknow.in/signup to create your free account.
+A: Visit https://vaaknow.com/signup to create your free account.
 
 **Q: How do I log in to Vaaknow?**
-A: Visit https://vaaknow.in/login to access your account.
+A: Visit https://vaaknow.com/login to access your account.
 
 **Q: Is Vaaknow safe for children?**
 A: Yes. Vaaknow uses an Automated Moderation Engine and a strict 3-Strike Disciplinary System to ensure child safety.
@@ -77,7 +77,7 @@ A: Yes. Vaaknow uses an Automated Moderation Engine and a strict 3-Strike Discip
 A: The post or message is blocked instantly (Strike 1 & 2 = warning). On the 3rd violation, the account is automatically suspended for 24 hours (Strike 3).
 
 **Q: Is Vaaknow available on mobile?**
-A: Yes, Vaaknow is accessible on all devices via the web at vaaknow.in.
+A: Yes, Vaaknow is accessible on all devices via the web at vaaknow.com.
 
 **Q: What are Chirps on Vaaknow?**
 A: Chirps are clean, moderated short-form posts and media updates shared by students on Vaaknow.
@@ -93,18 +93,18 @@ A: Yes, Vaaknow is completely free for all students aged 6–16.
 
 ## Official Links
 
-- Homepage: https://vaaknow.in
-- Login: https://vaaknow.in/login
-- Sign Up: https://vaaknow.in/signup
-- Reels / Video: https://vaaknow.in/video
-- Friends / Birdies: https://vaaknow.in/friends
-- Messages: https://vaaknow.in/messages
+- Homepage: https://vaaknow.com
+- Login: https://vaaknow.com/login
+- Sign Up: https://vaaknow.com/signup
+- Reels / Video: https://vaaknow.com/video
+- Friends / Birdies: https://vaaknow.com/friends
+- Messages: https://vaaknow.com/messages
 
 ## Official Information
 
 - Brand Name: Vaaknow
-- Also Known As: Vaaknow.in, Vaaknow.com, Vaaknow App, Vaaknow Social Platform
-- Official Website: https://vaaknow.in
+- Also Known As: vaaknow.com, Vaaknow.com, Vaaknow App, Vaaknow Social Platform
+- Official Website: https://vaaknow.com
 - Target Demographic: Students aged 6 to 16 years
 - Platform Type: Social Networking Web Application
 - Core Technologies: Real-time Automated Moderation Engine & 3-Strike Disciplinary System

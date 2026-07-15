@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   description: "View student profiles, shared Chirps, Reels, and verified Birdie connections on Vaaknow — the safe social learning platform for ages 6–16.",
   keywords: ["Vaaknow profile", "student portfolio", "Vaaknow user profile", "Chirps timeline", "Birdie connections"],
   alternates: {
-    canonical: "https://vaaknow.in/profile",
+    canonical: "https://vaaknow.com/profile",
   },
   openGraph: {
     title: "Student Profile & Chirps — Vaaknow",
     description: "View student profiles, shared Chirps, and Birdie connections on Vaaknow.",
-    url: "https://vaaknow.in/profile",
+    url: "https://vaaknow.com/profile",
     siteName: "Vaaknow",
   },
 };

@@ -2,7 +2,7 @@
 
 ## Platform Identity
 - **Platform Name**: Vaaknow
-- **Primary Domain**: https://vaaknow.in
+- **Primary Domain**: https://vaaknow.com
 - **Target Audience**: Students, kids, and young learners aged 6 to 16 years old.
 - **Mission**: Providing a safe, AI-moderated social learning ecosystem where young people can connect, share creative thoughts, watch educational short videos, and practice healthy digital citizenship without exposure to abusive language, bullying, or inappropriate adult content.
 

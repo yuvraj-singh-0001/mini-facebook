@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://vaaknow.in"),
+  metadataBase: new URL("https://vaaknow.com"),
   title: {
     default: "Vaaknow — Safe Social Platform for Students (Ages 6-16)",
     template: "%s | Vaaknow"
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     // Brand-exact (highest priority — triggers branded search)
     "Vaaknow",
     "Vaaknow.com",
-    "Vaaknow.in",
+    "vaaknow.com",
     "Vaaknow app",
     "Vaaknow social",
     "Vaaknow login",
@@ -67,13 +67,13 @@ export const metadata: Metadata = {
     "AI moderated student community",
     "automated moderation social platform",
   ],
-  authors: [{ name: "Vaaknow Team", url: "https://vaaknow.in" }],
+  authors: [{ name: "Vaaknow Team", url: "https://vaaknow.com" }],
   creator: "Vaaknow",
   publisher: "Vaaknow",
   category: "Social Networking",
   classification: "Education, Social Networking",
   alternates: {
-    canonical: "https://vaaknow.in",
+    canonical: "https://vaaknow.com",
   },
   robots: {
     index: true,
@@ -92,13 +92,13 @@ export const metadata: Metadata = {
     title: "Vaaknow — Safe Social Platform for Students (Ages 6-16)",
     description:
       "Join Vaaknow — the safe, moderated social network for students aged 6–16. Share Chirps, watch Reels, connect with Birdies. Powered by an Automated Moderation Engine & 3-Strike System.",
-    url: "https://vaaknow.in",
+    url: "https://vaaknow.com",
     siteName: "Vaaknow",
     locale: "en_IN",
     type: "website",
     images: [
       {
-        url: "https://vaaknow.in/logo.png",
+        url: "https://vaaknow.com/logo.png",
         width: 1200,
         height: 630,
         alt: "Vaaknow — Safe Social Platform for Students",
@@ -110,7 +110,7 @@ export const metadata: Metadata = {
     title: "Vaaknow — Safe Social Platform for Students (Ages 6-16)",
     description:
       "Vaaknow: The safe, moderated social network for students aged 6–16. Chirps, Reels, Birdies — cyberbullying-free.",
-    images: ["https://vaaknow.in/logo.png"],
+    images: ["https://vaaknow.com/logo.png"],
   },
   verification: {
     // Add your Google Search Console verification code here when you get it
@@ -143,17 +143,17 @@ export default function RootLayout({
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "@id": "https://vaaknow.in/#website",
+      "@id": "https://vaaknow.com/#website",
       "name": "Vaaknow",
-      "alternateName": ["Vaaknow.in", "Vaaknow.com", "Vaaknow App", "Vaaknow Social"],
-      "url": "https://vaaknow.in",
+      "alternateName": ["vaaknow.com", "Vaaknow.com", "Vaaknow App", "Vaaknow Social"],
+      "url": "https://vaaknow.com",
       "description": "Vaaknow is a safe, moderated social platform for students aged 6–16, featuring Chirps, Reels, Birdies, Automated Moderation, and a 3-Strike Disciplinary System.",
       "inLanguage": "en",
       "potentialAction": {
         "@type": "SearchAction",
         "target": {
           "@type": "EntryPoint",
-          "urlTemplate": "https://vaaknow.in/?search={search_term_string}"
+          "urlTemplate": "https://vaaknow.com/?search={search_term_string}"
         },
         "query-input": "required name=search_term_string"
       }
@@ -163,17 +163,17 @@ export default function RootLayout({
     {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "@id": "https://vaaknow.in/#organization",
+      "@id": "https://vaaknow.com/#organization",
       "name": "Vaaknow",
-      "alternateName": ["Vaaknow.in", "Vaaknow Platform"],
-      "url": "https://vaaknow.in",
+      "alternateName": ["vaaknow.com", "Vaaknow Platform"],
+      "url": "https://vaaknow.com",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://vaaknow.in/logo.png",
+        "url": "https://vaaknow.com/logo.png",
         "width": 512,
         "height": 512
       },
-      "image": "https://vaaknow.in/logo.png",
+      "image": "https://vaaknow.com/logo.png",
       "description": "Vaaknow is a safe, child-friendly social networking platform exclusively for students aged 6 to 16 years.",
       "foundingDate": "2024",
       "slogan": "Safe Social for Students",
@@ -184,8 +184,8 @@ export default function RootLayout({
         "Cyberbullying Prevention"
       ],
       "sameAs": [
-        "https://vaaknow.in",
-        "https://www.vaaknow.in"
+        "https://vaaknow.com",
+        "https://www.vaaknow.com"
       ]
     },
 
@@ -193,13 +193,13 @@ export default function RootLayout({
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "@id": "https://vaaknow.in/#app",
+      "@id": "https://vaaknow.com/#app",
       "name": "Vaaknow",
       "alternateName": "Vaaknow Safe Social Platform",
       "applicationCategory": "SocialNetworkingApplication",
       "applicationSubCategory": "Education",
       "operatingSystem": "Web, iOS, Android",
-      "url": "https://vaaknow.in",
+      "url": "https://vaaknow.com",
       "description": "Vaaknow is a specialized, safe social platform restricted to students aged 6–16. It features an Automated Moderation Engine filtering adult content, abusive slang, and spam, plus a 3-Strike Disciplinary System with 24-hour account suspension.",
       "isFamilyFriendly": true,
       "inLanguage": "en",
@@ -242,19 +242,19 @@ export default function RootLayout({
           "@type": "ListItem",
           "position": 1,
           "name": "Vaaknow Home",
-          "item": "https://vaaknow.in"
+          "item": "https://vaaknow.com"
         },
         {
           "@type": "ListItem",
           "position": 2,
           "name": "Log In",
-          "item": "https://vaaknow.in/login"
+          "item": "https://vaaknow.com/login"
         },
         {
           "@type": "ListItem",
           "position": 3,
           "name": "Sign Up",
-          "item": "https://vaaknow.in/signup"
+          "item": "https://vaaknow.com/signup"
         }
       ]
     },
@@ -269,7 +269,7 @@ export default function RootLayout({
           "name": "What is Vaaknow?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Vaaknow (vaaknow.in) is a safe, moderated social platform built exclusively for students aged 6 to 16 years. It provides a cyberbullying-free environment with features like Chirps (posts), Reels (short videos), and Birdies (friend connections), powered by an Automated Moderation Engine."
+            "text": "Vaaknow (vaaknow.com) is a safe, moderated social platform built exclusively for students aged 6 to 16 years. It provides a cyberbullying-free environment with features like Chirps (posts), Reels (short videos), and Birdies (friend connections), powered by an Automated Moderation Engine."
           }
         },
         {
@@ -285,7 +285,7 @@ export default function RootLayout({
           "name": "How do I sign up on Vaaknow?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Visit vaaknow.in/signup to create your free Vaaknow account. You'll need to provide your name, email or phone number, and create a password. Vaaknow is free for all students aged 6–16."
+            "text": "Visit vaaknow.com/signup to create your free Vaaknow account. You'll need to provide your name, email or phone number, and create a password. Vaaknow is free for all students aged 6–16."
           }
         },
         {
@@ -309,7 +309,7 @@ export default function RootLayout({
           "name": "Is Vaaknow free to use?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, Vaaknow is completely free for all students aged 6–16. Simply sign up at vaaknow.in to get started."
+            "text": "Yes, Vaaknow is completely free for all students aged 6–16. Simply sign up at vaaknow.com to get started."
           }
         }
       ]
@@ -334,7 +334,7 @@ export default function RootLayout({
         {/* Additional SEO meta */}
         <meta name="theme-color" content="#1877f2" />
         <meta name="msapplication-TileColor" content="#1877f2" />
-        <link rel="canonical" href="https://vaaknow.in" />
+        <link rel="canonical" href="https://vaaknow.com" />
       </head>
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-fb-bg text-fb-text-dark">
         <AuthGuard>
