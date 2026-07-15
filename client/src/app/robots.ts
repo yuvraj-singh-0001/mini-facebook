@@ -5,15 +5,77 @@ export default function robots(): MetadataRoute.Robots {
 
   return {
     rules: [
+      // All search bots — full access to public pages
       {
         userAgent: '*',
-        allow: ['/', '/video', '/login', '/signup', '/friends', '/profile', '/messages', '/llms.txt'],
-        disallow: ['/api/*'],
+        allow: [
+          '/',
+          '/login',
+          '/signup',
+          '/video',
+          '/friends',
+          '/profile',
+          '/messages',
+          '/sitemap.xml',
+          '/llms.txt',
+          '/logo.png',
+        ],
+        disallow: [
+          '/api/',
+          '/_next/',
+          '/private/',
+        ],
       },
+      // Google — explicit priority access
       {
-        userAgent: ['Googlebot', 'GPTBot', 'PerplexityBot', 'ClaudeBot', 'Google-Extended', 'CCBot', 'Applebot-Extended', 'Amazonbot', 'Omgilibot'],
-        allow: ['/', '/video', '/login', '/signup', '/friends', '/profile', '/messages', '/llms.txt'],
-        disallow: ['/api/*'],
+        userAgent: 'Googlebot',
+        allow: [
+          '/',
+          '/login',
+          '/signup',
+          '/video',
+          '/friends',
+          '/profile',
+          '/messages',
+          '/sitemap.xml',
+          '/llms.txt',
+          '/logo.png',
+        ],
+        disallow: ['/api/', '/_next/'],
+        crawlDelay: 0,
+      },
+      // Google Images
+      {
+        userAgent: 'Googlebot-Image',
+        allow: ['/logo.png', '/'],
+      },
+      // Bing
+      {
+        userAgent: 'Bingbot',
+        allow: [
+          '/',
+          '/login',
+          '/signup',
+          '/video',
+          '/sitemap.xml',
+        ],
+        disallow: ['/api/', '/_next/'],
+        crawlDelay: 1,
+      },
+      // AI search engines (Perplexity, ChatGPT, etc.)
+      {
+        userAgent: [
+          'GPTBot',
+          'PerplexityBot',
+          'ClaudeBot',
+          'Google-Extended',
+          'CCBot',
+          'Applebot-Extended',
+          'Amazonbot',
+          'Omgilibot',
+        ],
+        allow: ['/', '/login', '/signup', '/video', '/llms.txt'],
+        disallow: ['/api/', '/_next/'],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

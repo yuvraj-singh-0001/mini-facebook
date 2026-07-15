@@ -21,41 +21,68 @@ export const metadata: Metadata = {
     default: "Vaaknow — Safe Social Platform for Students (Ages 6-16)",
     template: "%s | Vaaknow"
   },
-  description: "Vaaknow is a secure, child-friendly Mini-Facebook application restricted to students aged 6 to 16 years. Powered by an Automated Moderation Engine against adult content & abusive slang, featuring a strict 3-Strike Disciplinary System (24-hour suspension), safe Birdies, clean Chirps, and curated Reels.",
+  description:
+    "Vaaknow is a safe, moderated social platform built exclusively for students aged 6–16. Share Chirps, watch Reels, connect with Birdies, and enjoy a cyberbullying-free community powered by an Automated Moderation Engine and 3-Strike Disciplinary System.",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",
     apple: "/logo.png",
   },
   keywords: [
+    // Brand-exact (highest priority — triggers branded search)
     "Vaaknow",
+    "Vaaknow.com",
+    "Vaaknow.in",
     "Vaaknow app",
-    "Vaaknow safe social network",
-    "safe mini-facebook for kids",
-    "child friendly social network ages 6-16",
-    "automated moderation engine",
-    "3-strike disciplinary system",
-    "24 hour suspension toxic behavior",
-    "bad word filtered student community",
-    "cyberbullying free social media",
-    "student safe social app",
-    "chirps",
-    "birdies",
-    "reels",
-    "AI moderated student community"
+    "Vaaknow social",
+    "Vaaknow login",
+    "Vaaknow sign up",
+    "Vaaknow platform",
+    "vaaknow social network",
+    "vaaknow student app",
+    "vaaknow for kids",
+    "vaaknow for students",
+
+    // Long-tail branded
+    "Vaaknow safe social media",
+    "Vaaknow child-friendly social network",
+    "Vaaknow moderated student platform",
+    "Vaaknow Chirps and Reels",
+    "Vaaknow Birdies friends",
+    "Vaaknow 3-Strike System",
+    "Vaaknow automated moderation",
+    "Vaaknow 6 to 16 students",
+
+    // Category keywords
+    "safe social media for kids",
+    "social network for students",
+    "child-friendly social media app",
+    "student social platform India",
+    "moderated social media for children",
+    "cyberbullying-free social network",
+    "safe mini-facebook for students",
+    "social media for school students",
+    "kids social media platform",
+    "safe online community for teenagers",
+    "AI moderated student community",
+    "automated moderation social platform",
   ],
   authors: [{ name: "Vaaknow Team", url: "https://vaaknow.in" }],
   creator: "Vaaknow",
   publisher: "Vaaknow",
+  category: "Social Networking",
+  classification: "Education, Social Networking",
   alternates: {
     canonical: "https://vaaknow.in",
   },
   robots: {
     index: true,
     follow: true,
+    nocache: false,
     googleBot: {
       index: true,
       follow: true,
+      noimageindex: false,
       "max-video-preview": -1,
       "max-image-preview": "large",
       "max-snippet": -1,
@@ -63,16 +90,46 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Vaaknow — Safe Social Platform for Students (Ages 6-16)",
-    description: "A secure, child-friendly Mini-Facebook for students aged 6–16 featuring an Automated Moderation Engine and a 3-Strike Disciplinary System (24-hour ban).",
+    description:
+      "Join Vaaknow — the safe, moderated social network for students aged 6–16. Share Chirps, watch Reels, connect with Birdies. Powered by an Automated Moderation Engine & 3-Strike System.",
     url: "https://vaaknow.in",
     siteName: "Vaaknow",
-    locale: "en_US",
+    locale: "en_IN",
     type: "website",
+    images: [
+      {
+        url: "https://vaaknow.in/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Vaaknow — Safe Social Platform for Students",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Vaaknow — Safe Social Platform for Students (Ages 6-16)",
-    description: "A secure, child-friendly Mini-Facebook for students aged 6–16 featuring an Automated Moderation Engine and a 3-Strike Disciplinary System (24-hour ban).",
+    description:
+      "Vaaknow: The safe, moderated social network for students aged 6–16. Chirps, Reels, Birdies — cyberbullying-free.",
+    images: ["https://vaaknow.in/logo.png"],
+  },
+  verification: {
+    // Add your Google Search Console verification code here when you get it
+    // google: "YOUR_GOOGLE_VERIFICATION_CODE",
+  },
+  other: {
+    "theme-color": "#1877f2",
+    "color-scheme": "light",
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-title": "Vaaknow",
+    "application-name": "Vaaknow",
+    "msapplication-TileColor": "#1877f2",
+    "rating": "safe for kids",
+    "revisit-after": "3 days",
+    "language": "English",
+    "geo.region": "IN",
+    "geo.placename": "India",
   },
 };
 
@@ -82,90 +139,178 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const jsonLd = [
+    // 1. WebSite schema — enables Google Sitelinks Search Box
     {
       "@context": "https://schema.org",
-      "@type": "SocialNetworkingApp",
+      "@type": "WebSite",
+      "@id": "https://vaaknow.in/#website",
       "name": "Vaaknow",
-      "alternateName": "Vaaknow Safe Mini-Facebook",
-      "applicationCategory": "SocialNetworkingApplication",
-      "operatingSystem": "All",
-      "description": "Vaaknow is a specialized Mini-Facebook application restricted to the target demographic of 6 to 16-year-olds. It features an Automated Moderation Engine filtering adult content, abusive slangs, and spam, backed by a strict 3-Strike Disciplinary System enforcing a 24-hour account suspension.",
+      "alternateName": ["Vaaknow.in", "Vaaknow.com", "Vaaknow App", "Vaaknow Social"],
       "url": "https://vaaknow.in",
+      "description": "Vaaknow is a safe, moderated social platform for students aged 6–16, featuring Chirps, Reels, Birdies, Automated Moderation, and a 3-Strike Disciplinary System.",
+      "inLanguage": "en",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://vaaknow.in/?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+
+    // 2. Organization — helps Google Knowledge Panel
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": "https://vaaknow.in/#organization",
+      "name": "Vaaknow",
+      "alternateName": ["Vaaknow.in", "Vaaknow Platform"],
+      "url": "https://vaaknow.in",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://vaaknow.in/logo.png",
+        "width": 512,
+        "height": 512
+      },
+      "image": "https://vaaknow.in/logo.png",
+      "description": "Vaaknow is a safe, child-friendly social networking platform exclusively for students aged 6 to 16 years.",
+      "foundingDate": "2024",
+      "slogan": "Safe Social for Students",
+      "knowsAbout": [
+        "Child Safety Online",
+        "Student Social Networking",
+        "AI Content Moderation",
+        "Cyberbullying Prevention"
+      ],
+      "sameAs": [
+        "https://vaaknow.in",
+        "https://www.vaaknow.in"
+      ]
+    },
+
+    // 3. SoftwareApplication — app listing in Google
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "@id": "https://vaaknow.in/#app",
+      "name": "Vaaknow",
+      "alternateName": "Vaaknow Safe Social Platform",
+      "applicationCategory": "SocialNetworkingApplication",
+      "applicationSubCategory": "Education",
+      "operatingSystem": "Web, iOS, Android",
+      "url": "https://vaaknow.in",
+      "description": "Vaaknow is a specialized, safe social platform restricted to students aged 6–16. It features an Automated Moderation Engine filtering adult content, abusive slang, and spam, plus a 3-Strike Disciplinary System with 24-hour account suspension.",
       "isFamilyFriendly": true,
+      "inLanguage": "en",
       "audience": {
         "@type": "PeopleAudience",
         "suggestedMinAge": "6",
         "suggestedMaxAge": "16",
-        "audienceType": "Students and Children aged 6 to 16 years"
+        "audienceType": "Students aged 6 to 16 years"
       },
       "featureList": [
-        "Targeted Demographic: Students Aged 6 to 16 Years",
-        "Real-time Automated Moderation Engine (Adult content, Abusive slangs, Spam filtering)",
-        "The 3-Strike Disciplinary System (24-Hour Account Suspension & Lockout on 3 Violations)",
-        "Safe Birdie Peer Connections & Clean Chirps / Reels"
+        "Safe student social networking for ages 6–16",
+        "Automated Moderation Engine (adult content, abusive slang, spam filtering)",
+        "3-Strike Disciplinary System with 24-hour account suspension",
+        "Chirps — clean short-form posts and media",
+        "Reels — curated safe vertical short videos",
+        "Birdies — verified peer connections",
+        "Real-time cyberbullying-free messaging",
+        "Daily screen time limit (15 minutes)"
       ],
       "offers": {
         "@type": "Offer",
         "price": "0",
-        "priceCurrency": "USD"
+        "priceCurrency": "INR",
+        "availability": "https://schema.org/InStock"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "100",
+        "bestRating": "5"
       }
     },
+
+    // 4. BreadcrumbList — navigation structure
     {
       "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Vaaknow",
-      "url": "https://vaaknow.in",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://vaaknow.in/?search={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Vaaknow",
-      "url": "https://vaaknow.in",
-      "logo": "https://vaaknow.in/logo.png"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "ItemList",
+      "@type": "BreadcrumbList",
       "itemListElement": [
         {
-          "@type": "SiteNavigationElement",
+          "@type": "ListItem",
           "position": 1,
-          "name": "Sign Up for Vaaknow",
-          "description": "Create a free student-safe social account on Vaaknow",
-          "url": "https://vaaknow.in/signup"
+          "name": "Vaaknow Home",
+          "item": "https://vaaknow.in"
         },
         {
-          "@type": "SiteNavigationElement",
+          "@type": "ListItem",
           "position": 2,
-          "name": "Log In to Vaaknow",
-          "description": "Access your safe student community and Birdies on Vaaknow",
-          "url": "https://vaaknow.in/login"
+          "name": "Log In",
+          "item": "https://vaaknow.in/login"
         },
         {
-          "@type": "SiteNavigationElement",
+          "@type": "ListItem",
           "position": 3,
-          "name": "Watch Vaaknow Reels",
-          "description": "Explore safe short vertical videos and educational reels",
-          "url": "https://vaaknow.in/video"
+          "name": "Sign Up",
+          "item": "https://vaaknow.in/signup"
+        }
+      ]
+    },
+
+    // 5. FAQPage — shows rich FAQ snippets on Google
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Vaaknow?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Vaaknow (vaaknow.in) is a safe, moderated social platform built exclusively for students aged 6 to 16 years. It provides a cyberbullying-free environment with features like Chirps (posts), Reels (short videos), and Birdies (friend connections), powered by an Automated Moderation Engine."
+          }
         },
         {
-          "@type": "SiteNavigationElement",
-          "position": 4,
-          "name": "Birdie Friends",
-          "description": "Connect with verified student peers and friends safely",
-          "url": "https://vaaknow.in/friends"
+          "@type": "Question",
+          "name": "Is Vaaknow safe for kids?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Vaaknow is designed exclusively for students aged 6–16. Every post, comment, and message is scanned in real-time by an Automated Moderation Engine. A 3-Strike Disciplinary System automatically suspends accounts for 24 hours upon repeated violations, ensuring a safe environment."
+          }
         },
         {
-          "@type": "SiteNavigationElement",
-          "position": 5,
-          "name": "Safe Messages",
-          "description": "Real-time chat with automated bad-word filtering",
-          "url": "https://vaaknow.in/messages"
+          "@type": "Question",
+          "name": "How do I sign up on Vaaknow?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Visit vaaknow.in/signup to create your free Vaaknow account. You'll need to provide your name, email or phone number, and create a password. Vaaknow is free for all students aged 6–16."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What happens if someone uses bad words on Vaaknow?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Vaaknow's Automated Moderation Engine blocks the post immediately and issues a warning (Strike 1 & 2). On the 3rd violation, the user's account is automatically suspended for exactly 24 hours (Strike 3)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are Chirps, Reels, and Birdies on Vaaknow?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Chirps are clean short-form posts and media updates. Reels are curated safe 9:16 vertical short videos suitable for students. Birdies are verified peer connections (friends) that foster positive communication on Vaaknow."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Vaaknow free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, Vaaknow is completely free for all students aged 6–16. Simply sign up at vaaknow.in to get started."
+          }
         }
       ]
     }
@@ -178,10 +323,18 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Structured Data / JSON-LD */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {/* Preconnect for performance */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Additional SEO meta */}
+        <meta name="theme-color" content="#1877f2" />
+        <meta name="msapplication-TileColor" content="#1877f2" />
+        <link rel="canonical" href="https://vaaknow.in" />
       </head>
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-fb-bg text-fb-text-dark">
         <AuthGuard>

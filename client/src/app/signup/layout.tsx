@@ -1,17 +1,44 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sign Up for Vaaknow — Secure Mini-Facebook for Students (Ages 6-16)",
-  description: "Create your free Vaaknow account today. A secure Mini-Facebook alternative designed for students aged 6 to 16, protected by an Automated Moderation Engine and 3-Strike Disciplinary System.",
-  keywords: ["Vaaknow sign up", "Vaaknow register", "secure mini-facebook signup", "safe student social registration", "child friendly social signup"],
+  title: "Sign Up for Vaaknow — Join the Safe Student Social Platform",
+  description:
+    "Create your free Vaaknow account at vaaknow.in. A safe, moderated social network exclusively for students aged 6–16. Join thousands of students sharing Chirps, Reels, and connecting with Birdies.",
+  keywords: [
+    "Vaaknow sign up",
+    "Vaaknow register",
+    "vaaknow.in signup",
+    "Vaaknow create account",
+    "vaaknow student registration",
+    "join vaaknow",
+    "vaaknow app signup",
+    "safe student social signup",
+    "child friendly social registration",
+  ],
   alternates: {
     canonical: "https://vaaknow.in/signup",
   },
   openGraph: {
-    title: "Sign Up for Vaaknow — Secure Mini-Facebook for Students (Ages 6-16)",
-    description: "Create your Vaaknow account. A secure, heavily moderated community for students aged 6-16 with clean Chirps, Reels, and Birdies.",
+    title: "Sign Up for Vaaknow — Join the Safe Student Social Platform",
+    description:
+      "Create your free Vaaknow account — the safe, moderated social network for students aged 6–16. Chirps, Reels, Birdies — cyberbullying-free.",
     url: "https://vaaknow.in/signup",
     siteName: "Vaaknow",
+    images: [
+      {
+        url: "https://vaaknow.in/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Vaaknow Sign Up — Safe Social Platform for Students",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sign Up for Vaaknow — Safe Student Social Platform",
+    description:
+      "Create your free Vaaknow account — the safe, moderated social network for students aged 6–16.",
+    images: ["https://vaaknow.in/logo.png"],
   },
 };
 

@@ -2,47 +2,55 @@ import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://vaaknow.in';
+  const now = new Date();
 
   return [
+    // Homepage — highest priority, Google indexes this first
     {
       url: `${baseUrl}`,
-      lastModified: new Date(),
-      changeFrequency: 'always',
+      lastModified: now,
+      changeFrequency: 'daily',
       priority: 1.0,
     },
-    {
-      url: `${baseUrl}/video`,
-      lastModified: new Date(),
-      changeFrequency: 'hourly',
-      priority: 0.9,
-    },
+    // Login — brand search "vaaknow login" lands here
     {
       url: `${baseUrl}/login`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.8,
+      priority: 0.9,
     },
+    // Signup — brand search "vaaknow sign up" lands here
     {
       url: `${baseUrl}/signup`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    // Video / Reels — high traffic potential
+    {
+      url: `${baseUrl}/video`,
+      lastModified: now,
+      changeFrequency: 'hourly',
       priority: 0.8,
     },
+    // Friends / Birdies
     {
       url: `${baseUrl}/friends`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'daily',
       priority: 0.7,
     },
+    // Profile
     {
       url: `${baseUrl}/profile`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'daily',
       priority: 0.7,
     },
+    // Messages
     {
       url: `${baseUrl}/messages`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'daily',
       priority: 0.7,
     },
