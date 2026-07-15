@@ -47,6 +47,7 @@ exports.sendRequest = async (req, res) => {
     await new Notification({
       recipient: recipientId,
       sender: requesterId,
+      type: 'friend_request',
       message: `${senderUser.firstName} ${senderUser.lastName} sent you a friend request.`
     }).save();
 
@@ -78,6 +79,7 @@ exports.acceptRequest = async (req, res) => {
     await new Notification({
       recipient: requesterId,
       sender: recipientId,
+      type: 'friend_request',
       message: `${senderUser.firstName} ${senderUser.lastName} accepted your friend request.`
     }).save();
 
