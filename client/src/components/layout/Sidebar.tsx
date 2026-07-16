@@ -32,13 +32,20 @@ export default function Sidebar() {
     { icon: <PlaySquare className="text-blue-500" size={28} />, title: "Reels", href: "/video" },
     { icon: <div className="w-8 h-8 rounded-full bg-gray-200  flex items-center justify-center"><ChevronDown size={20} /></div>, title: "See more", href: "#" },
   ];
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    const implementedRoutes = ["/profile", "/video", "/", "/friends"];
+    if (!implementedRoutes.includes(href)) {
+      e.preventDefault();
+      alert("coming soon its on working");
+    }
+  };
 
   return (
     <div className="hidden xl:block w-[300px] fixed top-[56px] left-0 bottom-0 overflow-y-auto pt-4 px-2 hover-scrollbar">
       <ul className="space-y-1">
         {sidebarLinks.map((link, index) => (
           <li key={index}>
-            <Link href={link.href} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer">
+            <Link href={link.href} onClick={(e) => handleLinkClick(e, link.href)} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer">
               <div className="w-9 h-9 flex items-center justify-center rounded-full overflow-hidden">
                 {link.icon}
               </div>
@@ -56,7 +63,10 @@ export default function Sidebar() {
           {/* Mock shortcuts */}
           {[1, 2, 3].map((_, idx) => (
             <li key={idx}>
-              <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer">
+              <div 
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+                onClick={() => alert("coming soon its on working")}
+              >
                 <div className="w-9 h-9 bg-gradient-to-tr from-green-400 to-blue-500 rounded-lg shadow-sm"></div>
                 <span className="font-medium text-[15px] text-gray-700 ">Cool Group {idx + 1}</span>
               </div>
