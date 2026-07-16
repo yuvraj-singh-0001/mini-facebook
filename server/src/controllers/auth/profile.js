@@ -60,6 +60,7 @@ exports.updateProfileDetails = async (req, res) => {
         hometown: updatedUser.hometown,
         relationshipStatus: updatedUser.relationshipStatus,
         isPublicProfile: updatedUser.isPublicProfile,
+        gender: updatedUser.gender,
         createdAt: updatedUser.createdAt
       }
     });
@@ -94,6 +95,7 @@ exports.togglePublicProfile = async (req, res) => {
         hometown: updatedUser.hometown,
         relationshipStatus: updatedUser.relationshipStatus,
         isPublicProfile: updatedUser.isPublicProfile,
+        gender: updatedUser.gender,
         createdAt: updatedUser.createdAt
       }
     });

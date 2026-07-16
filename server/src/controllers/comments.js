@@ -37,7 +37,7 @@ exports.createComment = async (req, res) => {
       await notification.save();
     }
 
-    const populatedComment = await Comment.findById(newComment._id).populate('user', 'firstName lastName avatar').lean();
+    const populatedComment = await Comment.findById(newComment._id).populate('user', 'firstName lastName avatar gender').lean();
 
     res.status(201).json({ message: 'Comment added', comment: populatedComment });
   } catch (error) {
@@ -51,7 +51,7 @@ exports.getComments = async (req, res) => {
     const postId = req.params.postId;
     const comments = await Comment.find({ post: postId })
       .sort({ createdAt: 1 })
-      .populate('user', 'firstName lastName avatar')
+      .populate('user', 'firstName lastName avatar gender')
       .lean();
 
     res.status(200).json({ comments });

@@ -10,6 +10,7 @@ import CreateStoryModal from "@/components/feed/CreateStoryModal";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { API_URL } from "@/config/api";
+import { getDefaultAvatar } from "@/lib/utils";
 
 const formatViewCount = (count: number = 0) => {
   if (count >= 1000000) return `${(count / 1000000).toFixed(1).replace('.0', '')}M`;
@@ -200,7 +201,7 @@ export default function ProfilePage() {
   };
 
   const fullName = user ? `${user.firstName} ${user.lastName}` : "Loading...";
-  const avatar = user?.avatar || "/default-avatar.svg";
+  const avatar = user?.avatar || getDefaultAvatar(user?.gender);
 
   const renderTabContent = () => {
     if (activeTab === "About") {
@@ -350,7 +351,7 @@ export default function ProfilePage() {
                 <div key={friend.id} className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-200 hover:shadow-md transition-all group">
                   <Link href={`/profile/${friend.id}`} className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="relative shrink-0">
-                      <img src={friend.avatar} alt={friend.name} className="w-14 h-14 rounded-xl object-cover border border-gray-200 group-hover:scale-105 transition-transform" />
+                      <img src={friend.avatar || getDefaultAvatar(friend.gender)} alt={friend.name} className="w-14 h-14 rounded-xl object-cover border border-gray-200 group-hover:scale-105 transition-transform" />
                       {friend.isOnline && (
                         <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white"></div>
                       )}
@@ -697,7 +698,7 @@ export default function ProfilePage() {
                   {/* Post header */}
                   <div className="flex items-center justify-between px-4 pt-4 pb-2">
                     <div className="flex items-center gap-3">
-                      <img src={user?.avatar || '/default-avatar.svg'} alt="avatar" className="w-10 h-10 rounded-full object-cover border border-gray-200" />
+                      <img src={user?.avatar || getDefaultAvatar(user?.gender)} alt="avatar" className="w-10 h-10 rounded-full object-cover border border-gray-200" />
                       <div>
                         <p className="font-semibold text-[14px] text-black">{user?.firstName} {user?.lastName}</p>
                         <div className="flex items-center gap-2 text-[12px] text-gray-500">
@@ -864,7 +865,7 @@ export default function ProfilePage() {
                       {friends.slice(0, 6).map((friend) => (
                         <img 
                           key={friend.id} 
-                          src={friend.avatar} 
+                          src={friend.avatar || getDefaultAvatar(friend.gender)} 
                           className="w-8 h-8 rounded-full border-2 border-white -ml-2 first:ml-0 object-cover" 
                           alt="friend" 
                           title={friend.name}

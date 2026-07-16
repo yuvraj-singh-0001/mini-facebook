@@ -75,7 +75,7 @@ exports.createPost = async (req, res) => {
     }
 
     // Return populated post
-    const populatedPost = await Post.findById(newPost._id).populate('user', 'firstName lastName avatar').lean();
+    const populatedPost = await Post.findById(newPost._id).populate('user', 'firstName lastName avatar gender').lean();
 
     res.status(201).json({ message: 'Post created', post: populatedPost });
   } catch (error) {
@@ -103,7 +103,7 @@ exports.getFeed = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit + 1)
-      .populate('user', 'firstName lastName avatar')
+      .populate('user', 'firstName lastName avatar gender')
       .lean();
 
     const hasMore = posts.length > limit;
@@ -155,7 +155,7 @@ exports.getUserPosts = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate('user', 'firstName lastName avatar')
+      .populate('user', 'firstName lastName avatar gender')
       .lean();
 
     // Get comments count for each post
@@ -296,7 +296,7 @@ exports.getReels = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate('user', 'firstName lastName avatar isOnline')
+      .populate('user', 'firstName lastName avatar isOnline gender')
       .lean();
 
     if (reels.length === 0) {
@@ -381,7 +381,7 @@ exports.editPost = async (req, res) => {
     post.editedAt = new Date();
     await post.save();
 
-    const updatedPost = await Post.findById(postId).populate('user', 'firstName lastName avatar').lean();
+    const updatedPost = await Post.findById(postId).populate('user', 'firstName lastName avatar gender').lean();
 
     res.status(200).json({ message: 'Post updated successfully', post: updatedPost });
   } catch (error) {

@@ -1,5 +1,6 @@
 import React from "react";
 import { Video, Image as ImageIcon, Smile } from "lucide-react";
+import { getDefaultAvatar } from "@/lib/utils";
 
 export default function CreatePost() {
   return (
@@ -7,7 +8,7 @@ export default function CreatePost() {
       {/* Top section */}
       <div className="p-3 md:p-4 flex gap-2">
         <img
-          src="/default-avatar.svg"
+          src={getDefaultAvatar()}
           alt="User"
           className="w-10 h-10 rounded-full cursor-pointer"
         />

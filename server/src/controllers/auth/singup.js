@@ -50,6 +50,7 @@ exports.signup = async (req, res) => {
         hometown: newUser.hometown,
         relationshipStatus: newUser.relationshipStatus,
         isPublicProfile: newUser.isPublicProfile || false,
+        gender: newUser.gender,
         createdAt: newUser.createdAt
       }
     });

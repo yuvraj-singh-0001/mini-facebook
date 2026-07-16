@@ -5,6 +5,7 @@ import { Users, Bookmark, PlaySquare, Clock, Users2, ChevronDown, LogOut } from 
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { getDefaultAvatar } from '@/lib/utils';
 
 export default function Sidebar() {
   const [user, setUser] = useState<{name: string, avatar: string} | null>(null);
@@ -16,14 +17,14 @@ export default function Sidebar() {
     if (storedUser) {
       const u = JSON.parse(storedUser);
       let avatar = u.avatar;
-      if (avatar && avatar.includes('dicebear.com')) {
-        avatar = '/default-avatar.svg';
-        u.avatar = avatar;
+      if (avatar && (avatar.includes('dicebear.com') || avatar === '/default-avatar.svg')) {
+        avatar = null; // fall through to getDefaultAvatar
+        u.avatar = null;
         localStorage.setItem("user", JSON.stringify(u));
       }
       setUser({
         name: `${u.firstName} ${u.lastName}`,
-        avatar: avatar || "/default-avatar.svg"
+        avatar: avatar || getDefaultAvatar(u.gender)
       });
     }
   }, []);
@@ -37,7 +38,7 @@ export default function Sidebar() {
 
   const sidebarLinks = [
     { 
-      icon: <img src={user?.avatar || "/default-avatar.svg"} className="w-8 h-8 rounded-full object-cover" alt="User" />, 
+      icon: <img src={user?.avatar || getDefaultAvatar()} className="w-8 h-8 rounded-full object-cover" alt="User" />, 
       title: user?.name || "Yuvraj Singh", 
       href: "/profile" 
     },

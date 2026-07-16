@@ -8,6 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_URL } from "@/config/api";
 import toast, { Toaster } from "react-hot-toast";
+import { getDefaultAvatar } from "@/lib/utils";
 
 const formatViewCount = (count: number = 0) => {
   if (count >= 1000000) return `${(count / 1000000).toFixed(1).replace('.0', '')}M`;
@@ -151,7 +152,7 @@ export default function DynamicProfilePage() {
   if (!user) return <div className="min-h-screen bg-[#f0f2f5] pt-[56px] flex justify-center items-center"><div className="text-xl font-bold text-gray-500">User not found.</div></div>;
 
   const fullName = user.name;
-  const avatar = user.avatar || "/default-avatar.svg";
+  const avatar = user.avatar || getDefaultAvatar(user.gender);
 
   const renderTabContent = () => {
     if (activeTab === "About") {
@@ -292,7 +293,7 @@ export default function DynamicProfilePage() {
                 <div key={friend.id} className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-200 hover:shadow-md transition-all group">
                   <Link href={`/profile/${friend.id}`} className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="relative shrink-0">
-                      <img src={friend.avatar} alt={friend.name} className="w-14 h-14 rounded-xl object-cover border border-gray-200 group-hover:scale-105 transition-transform" />
+                      <img src={friend.avatar || getDefaultAvatar(friend.gender)} alt={friend.name} className="w-14 h-14 rounded-xl object-cover border border-gray-200 group-hover:scale-105 transition-transform" />
                       {friend.isOnline && (
                         <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white"></div>
                       )}
@@ -477,7 +478,7 @@ export default function DynamicProfilePage() {
               <div className="grid grid-cols-3 gap-2 rounded-lg">
                 {mutualFriends.map((mf) => (
                   <div key={mf.id} className="flex flex-col gap-1 cursor-pointer group">
-                    <img src={mf.avatar} alt="friend" className="w-full aspect-square object-cover rounded-lg group-hover:opacity-90" />
+                    <img src={mf.avatar || getDefaultAvatar(mf.gender)} alt="friend" className="w-full aspect-square object-cover rounded-lg group-hover:opacity-90" />
                     <span className="text-[13px] font-semibold text-black truncate">{mf.name}</span>
                   </div>
                 ))}
@@ -549,7 +550,7 @@ export default function DynamicProfilePage() {
                       {mutualFriends.slice(0, 6).map((mf) => (
                         <img 
                           key={mf.id} 
-                          src={mf.avatar} 
+                          src={mf.avatar || getDefaultAvatar(mf.gender)} 
                           className="w-8 h-8 rounded-full border-2 border-white -ml-2 first:ml-0 object-cover" 
                           alt="friend" 
                           title={mf.name}
@@ -592,7 +593,7 @@ export default function DynamicProfilePage() {
                   </button>
                 )}
                 <button onClick={() => router.push(`/messages?userId=${id}`)} className="bg-[#e4e6eb] hover:bg-[#d8dadf] text-black px-3 py-1.5 rounded-md font-semibold text-[15px] flex items-center gap-1.5 transition-colors">
-                  <img src="/default-avatar.svg" className="w-5 h-5" alt="msg" />
+                  <img src={getDefaultAvatar()} className="w-5 h-5" alt="msg" />
                   Message
                 </button>
               </div>

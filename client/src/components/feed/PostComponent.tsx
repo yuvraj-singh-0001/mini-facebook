@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { MoreHorizontal, ThumbsUp, MessageCircle, Share2, Send, Pencil, Trash2, X, Check } from 'lucide-react';
 import ShareModal from './ShareModal';
 import { API_URL } from '@/config/api';
+import { getDefaultAvatar } from "@/lib/utils";
 
 interface PostProps {
   post: any;
@@ -401,7 +402,7 @@ export default function PostComponent({ post: initialPost, currentUser, isProfil
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Link href={`/profile/${post.user._id}`}>
-            <img src={post.user.avatar || '/default-avatar.svg'} alt="User" className="w-10 h-10 rounded-full object-cover border border-gray-200 hover:opacity-90" />
+            <img src={post.user.avatar || getDefaultAvatar(post.user.gender)} alt="User" className="w-10 h-10 rounded-full object-cover border border-gray-200 hover:opacity-90" />
           </Link>
           <div>
             <Link href={`/profile/${post.user._id}`}>
@@ -541,7 +542,7 @@ export default function PostComponent({ post: initialPost, currentUser, isProfil
             {comments.map((comment, idx) => (
               <div key={idx} className="flex gap-2">
                 <Link href={`/profile/${comment.user._id}`}>
-                  <img src={comment.user.avatar || '/default-avatar.svg'} alt="User" className="w-8 h-8 rounded-full object-cover mt-1" />
+                  <img src={comment.user.avatar || getDefaultAvatar(comment.user.gender)} alt="User" className="w-8 h-8 rounded-full object-cover mt-1" />
                 </Link>
                 <div className="bg-[#f0f2f5] rounded-2xl px-3 py-2 max-w-[85%]">
                   <Link href={`/profile/${comment.user._id}`}>
@@ -555,7 +556,7 @@ export default function PostComponent({ post: initialPost, currentUser, isProfil
 
           {/* Comment Input */}
           <div className="flex gap-2 items-center">
-            <img src={currentUser?.avatar || '/default-avatar.svg'} alt="User" className="w-8 h-8 rounded-full object-cover" />
+            <img src={currentUser?.avatar || getDefaultAvatar(currentUser?.gender)} alt="User" className="w-8 h-8 rounded-full object-cover" />
             <form onSubmit={handleSubmitComment} className="flex-1 relative">
               <input 
                 type="text" 

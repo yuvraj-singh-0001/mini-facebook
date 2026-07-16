@@ -18,7 +18,7 @@ exports.createStory = async (req, res) => {
 
     await newStory.save();
     
-    const populatedStory = await Story.findById(newStory._id).populate('user', 'firstName lastName avatar').lean();
+    const populatedStory = await Story.findById(newStory._id).populate('user', 'firstName lastName avatar gender').lean();
 
     res.status(201).json({ message: 'Story created', story: populatedStory });
   } catch (error) {
@@ -41,7 +41,7 @@ exports.getFeedStories = async (req, res) => {
       expiresAt: { $gt: new Date() }
     })
     .sort({ createdAt: 1 }) // oldest active first per user looks better in story viewer, but we group them anyway
-    .populate('user', 'firstName lastName avatar')
+    .populate('user', 'firstName lastName avatar gender')
     .lean();
 
     // Group stories by user

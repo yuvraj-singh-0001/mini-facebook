@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Search, MoreHorizontal, Video } from "lucide-react";
 import Link from "next/link";
 import { API_URL } from "@/config/api";
+import { getDefaultAvatar } from "@/lib/utils";
 
 const formatFacebookTime = (dateString: string) => {
   if (!dateString) return '';
@@ -73,7 +74,7 @@ export default function RightPanel() {
               <Link href={`/messages?userId=${friend.id}`}>
                 <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer relative">
                   <div className="relative flex-shrink-0">
-                    <img src={friend.avatar} alt={friend.name} className="w-9 h-9 rounded-full object-cover border border-gray-200" />
+                    <img src={friend.avatar || getDefaultAvatar(friend.gender)} alt={friend.name} className="w-9 h-9 rounded-full object-cover border border-gray-200" />
                     {/* Show online status dynamically */}
                     {friend.isOnline && (
                       <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>

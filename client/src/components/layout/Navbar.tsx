@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSocket } from '@/components/providers/SocketProvider';
 import { usePathname } from 'next/navigation';
 import { API_URL } from '@/config/api';
+import { getDefaultAvatar } from '@/lib/utils';
 
 // Helper for dynamic Facebook-like relative time
 const formatFacebookTime = (dateString: string) => {
@@ -40,7 +41,7 @@ const formatFacebookTime = (dateString: string) => {
 };
 
 export default function Navbar() {
-  const [avatar, setAvatar] = useState("/default-avatar.svg");
+  const [avatar, setAvatar] = useState(getDefaultAvatar());
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -60,12 +61,12 @@ export default function Navbar() {
     if (storedUser) {
       const user = JSON.parse(storedUser);
       let newAvatar = user.avatar;
-      if (newAvatar && newAvatar.includes('dicebear.com')) {
-        newAvatar = '/default-avatar.svg';
-        user.avatar = newAvatar;
+      if (newAvatar && (newAvatar.includes('dicebear.com') || newAvatar === '/default-avatar.svg')) {
+        newAvatar = null; // will fall through to getDefaultAvatar
+        user.avatar = null;
         localStorage.setItem("user", JSON.stringify(user));
       }
-      if (newAvatar) setAvatar(newAvatar);
+      setAvatar(newAvatar || getDefaultAvatar(user.gender));
       // Delay non-critical navbar API calls — run AFTER feed & stories finish
       // Run sequentially so they don't compete with each other
       const timer = setTimeout(async () => {
@@ -243,7 +244,7 @@ export default function Navbar() {
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative flex-shrink-0">
                 <img
-                  src={user.avatar || '/default-avatar.svg'}
+                  src={user.avatar || getDefaultAvatar(user.gender)}
                   alt={user.name}
                   className="w-10 h-10 rounded-full object-cover border border-gray-200 group-hover:scale-105 transition-transform"
                 />

@@ -181,7 +181,7 @@ exports.getFriendsList = async (req, res) => {
     const friendships = await Friendship.find({
       $or: [{ requester: targetUserId }, { recipient: targetUserId }],
       status: 'accepted'
-    }).populate('requester recipient', 'firstName lastName avatar emailOrPhone isOnline lastSeen').lean();
+    }).populate('requester recipient', 'firstName lastName avatar emailOrPhone isOnline lastSeen gender').lean();
 
     // If viewing someone else's friend list, check which of those friends the requester is actually friends with
     let currentUserFriendIds = new Set();
@@ -205,6 +205,7 @@ exports.getFriendsList = async (req, res) => {
         lastName: friend.lastName,
         name: `${friend.firstName} ${friend.lastName}`,
         avatar: friend.avatar,
+        gender: friend.gender,
         isOnline: isMyFriend ? (friend.isOnline || false) : false,
         lastSeen: isMyFriend ? friend.lastSeen : null
       };
@@ -241,7 +242,7 @@ exports.getMutualFriends = async (req, res) => {
     const targetUserFriendships = await Friendship.find({
       $or: [{ requester: targetUserId }, { recipient: targetUserId }],
       status: 'accepted'
-    }).populate('requester recipient', 'firstName lastName avatar').lean();
+    }).populate('requester recipient', 'firstName lastName avatar gender').lean();
 
     const mutualFriends = [];
 
@@ -273,7 +274,7 @@ exports.getPendingRequests = async (req, res) => {
     const requests = await Friendship.find({
       recipient: currentUserId,
       status: 'pending'
-    }).populate('requester', 'firstName lastName avatar').lean();
+    }).populate('requester', 'firstName lastName avatar gender').lean();
 
     const formattedRequests = requests.map(f => ({
       requestId: f._id,
@@ -283,6 +284,7 @@ exports.getPendingRequests = async (req, res) => {
         lastName: f.requester.lastName,
         name: `${f.requester.firstName} ${f.requester.lastName}`,
         avatar: f.requester.avatar,
+        gender: f.requester.gender,
       }
     }));
 
@@ -311,7 +313,7 @@ exports.getAllUsers = async (req, res) => {
 
     // Get all users except current user (limited to 20 if searching, else 100)
     const users = await User.find(query)
-      .select('firstName lastName avatar isOnline lastSeen isPublicProfile')
+      .select('firstName lastName avatar isOnline lastSeen isPublicProfile gender')
       .limit(search ? 20 : 100)
       .lean();
 
@@ -339,6 +341,7 @@ exports.getAllUsers = async (req, res) => {
         lastName: u.lastName,
         name: `${u.firstName} ${u.lastName}`,
         avatar: u.avatar,
+        gender: u.gender,
         isOnline: status === 'friends' ? (u.isOnline || false) : false,
         lastSeen: status === 'friends' ? u.lastSeen : null,
         isPublicProfile: u.isPublicProfile || false,
@@ -396,6 +399,7 @@ exports.getUserProfile = async (req, res) => {
         hometown: targetUser.hometown,
         relationshipStatus: targetUser.relationshipStatus,
         isPublicProfile: targetUser.isPublicProfile || false,
+        gender: targetUser.gender,
         createdAt: targetUser.createdAt,
         isOnline: (status === 'friends' || status === 'self') ? (targetUser.isOnline || false) : false,
         lastSeen: (status === 'friends' || status === 'self') ? targetUser.lastSeen : null,

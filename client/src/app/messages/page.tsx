@@ -12,6 +12,7 @@ import EmojiPicker from 'emoji-picker-react';
 import Navbar from '@/components/layout/Navbar';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { API_URL } from '@/config/api';
+import { getDefaultAvatar } from '@/lib/utils';
 
 // Types
 interface User {
@@ -21,6 +22,7 @@ interface User {
   avatar: string;
   isOnline: boolean;
   lastSeen: string;
+  gender?: string;
   blockedUsers?: string[];
 }
 
@@ -116,7 +118,7 @@ function ChatContent() {
                       _id: userData.user.id,
                       firstName: userData.user.name?.split(' ')[0] || userData.user.firstName || '',
                       lastName: userData.user.name?.split(' ').slice(1).join(' ') || userData.user.lastName || '',
-                      avatar: userData.user.avatar || '/default-avatar.svg',
+                      avatar: userData.user.avatar || getDefaultAvatar(userData.user.gender),
                       isOnline: false,
                       lastSeen: new Date().toISOString()
                     };
@@ -284,7 +286,7 @@ function ChatContent() {
                 _id: senderId,
                 firstName: 'New',
                 lastName: 'User',
-                avatar: '/default-avatar.svg',
+                avatar: getDefaultAvatar(),
                 isOnline: true,
                 lastSeen: new Date().toISOString()
               },
@@ -577,7 +579,7 @@ function ChatContent() {
                   ${activeFriend?._id === conv.friend._id ? 'bg-[#ebf5ff]' : ''}`}
               >
                 <div className="relative flex-shrink-0">
-                  <img src={conv.friend.avatar || '/default-avatar.svg'} alt="avatar" className="w-[56px] h-[56px] rounded-full object-cover border border-gray-200" />
+                  <img src={conv.friend.avatar || getDefaultAvatar(conv.friend.gender)} alt="avatar" className="w-[56px] h-[56px] rounded-full object-cover border border-gray-200" />
                   {conv.friend.isOnline && (
                     <div className="absolute bottom-1 right-0 w-3.5 h-3.5 bg-[#31a24c] border-2 border-white rounded-full"></div>
                   )}
@@ -629,7 +631,7 @@ function ChatContent() {
                 className="relative shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => router.push(`/profile/${activeFriend._id}`)}
               >
-                <img src={activeFriend.avatar || '/default-avatar.svg'} alt="avatar" className="w-[42px] h-[42px] rounded-full object-cover border border-gray-200" />
+                <img src={activeFriend.avatar || getDefaultAvatar(activeFriend.gender)} alt="avatar" className="w-[42px] h-[42px] rounded-full object-cover border border-gray-200" />
                 {activeFriend.isOnline && (
                   <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#31a24c] border-2 border-white rounded-full"></div>
                 )}
@@ -671,7 +673,7 @@ function ChatContent() {
             {/* Friend intro card */}
             <div className="flex flex-col items-center justify-center py-6 mb-4">
               <img 
-                src={activeFriend.avatar || '/default-avatar.svg'} 
+                src={activeFriend.avatar || getDefaultAvatar(activeFriend.gender)} 
                 className="w-[80px] h-[80px] rounded-full border-2 border-white shadow-md mb-3 cursor-pointer hover:opacity-90 transition-opacity" 
                 onClick={() => router.push(`/profile/${activeFriend._id}`)}
                 alt="avatar"
@@ -717,7 +719,7 @@ function ChatContent() {
                   <div className={`flex ${isMine ? 'justify-end' : 'justify-start'} group mb-0.5`}>
                     
                     {!isMine && (
-                      <img src={activeFriend.avatar || '/default-avatar.svg'} alt="avatar" className="w-[28px] h-[28px] rounded-full object-cover mr-2 self-end mb-4 shrink-0" />
+                      <img src={activeFriend.avatar || getDefaultAvatar(activeFriend.gender)} alt="avatar" className="w-[28px] h-[28px] rounded-full object-cover mr-2 self-end mb-4 shrink-0" />
                     )}
                     
                     <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} max-w-[70%] sm:max-w-[60%]`}>
@@ -773,7 +775,7 @@ function ChatContent() {
             
             {isTyping && (
               <div className="flex justify-start mb-2">
-                <img src={activeFriend.avatar || '/default-avatar.svg'} alt="avatar" className="w-[28px] h-[28px] rounded-full object-cover mr-2 self-end mb-1" />
+                <img src={activeFriend.avatar || getDefaultAvatar(activeFriend.gender)} alt="avatar" className="w-[28px] h-[28px] rounded-full object-cover mr-2 self-end mb-1" />
                 <div className="bg-white px-4 py-3 rounded-[18px] rounded-bl-[4px] flex gap-1.5 items-center shadow-sm border border-gray-100">
                   <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
                   <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></span>

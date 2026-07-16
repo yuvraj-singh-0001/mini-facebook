@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
   gender: { type: String },
   avatar: {
     type: String,
-    default: '/default-avatar.svg'
+    default: ''
   },
   bio: { type: String, maxlength: 101, default: '' },
   workplace: { type: String, default: '' },

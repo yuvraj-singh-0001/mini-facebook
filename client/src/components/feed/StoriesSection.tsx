@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import CreateStoryModal from '@/components/feed/CreateStoryModal';
 import StoryViewerModal from '@/components/feed/StoryViewerModal';
 import { API_URL } from '@/config/api';
+import { getDefaultAvatar } from "@/lib/utils";
 
 export default function StoriesSection({ currentUser, ready = true }: { currentUser: any; ready?: boolean }) {
   const [storyGroups, setStoryGroups] = useState<any[]>([]);
@@ -49,7 +50,7 @@ export default function StoriesSection({ currentUser, ready = true }: { currentU
           className="min-w-[110px] w-[110px] h-[200px] rounded-xl relative overflow-hidden group cursor-pointer shadow-sm flex-shrink-0 bg-white border border-gray-200 flex flex-col"
         >
           <div className="h-[130px] w-full overflow-hidden">
-            <img src={currentUser?.avatar || '/default-avatar.svg'} alt="Your Profile" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            <img src={currentUser?.avatar || getDefaultAvatar(currentUser?.gender)} alt="Your Profile" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
           </div>
           <div className="flex-1 bg-white relative flex flex-col items-center justify-end pb-2">
             <div className="absolute -top-5 w-10 h-10 bg-[#1877f2] rounded-full flex items-center justify-center border-4 border-white">

@@ -6,7 +6,7 @@ exports.getNotifications = async (req, res) => {
     const notifications = await Notification.find({ recipient: userId })
       .sort({ createdAt: -1 })
       .limit(30)
-      .populate('sender', 'firstName lastName avatar')
+      .populate('sender', 'firstName lastName avatar gender')
       .lean();
 
     const unreadCount = await Notification.countDocuments({ recipient: userId, isRead: false });

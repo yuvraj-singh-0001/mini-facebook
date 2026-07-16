@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { UserPlus, Clock, Check, Users as UsersIcon } from "lucide-react";
 import { API_URL } from "@/config/api";
+import { getDefaultAvatar } from "@/lib/utils";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function FriendsPage() {
@@ -227,7 +228,7 @@ export default function FriendsPage() {
                   className="block overflow-hidden relative pb-[100%]"
                 >
                   <img
-                    src={req.requester.avatar}
+                    src={req.requester.avatar || getDefaultAvatar(req.requester.gender)}
                     alt="User"
                     className="absolute top-0 left-0 w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
@@ -286,7 +287,7 @@ export default function FriendsPage() {
                     className="block overflow-hidden relative pb-[100%]"
                   >
                     <img
-                      src={user.avatar}
+                      src={user.avatar || getDefaultAvatar(user.gender)}
                       alt="User"
                       className="absolute top-0 left-0 w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
@@ -364,7 +365,7 @@ export default function FriendsPage() {
                     className="block overflow-hidden relative pb-[100%]"
                   >
                     <img
-                      src={user.avatar}
+                      src={user.avatar || getDefaultAvatar(user.gender)}
                       alt="User"
                       className="absolute top-0 left-0 w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
