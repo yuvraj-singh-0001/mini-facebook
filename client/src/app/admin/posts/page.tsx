@@ -19,12 +19,12 @@ export default function PostsAdminPage() {
 
   const fetchPosts = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const adminPin = sessionStorage.getItem('admin_pin') || '';
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
       
       const res = await fetch(`${apiUrl}/api/admin/posts`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'x-admin-pin': adminPin
         }
       });
       
@@ -44,13 +44,13 @@ export default function PostsAdminPage() {
     
     setIsDeleting(postId);
     try {
-      const token = localStorage.getItem('token');
+      const adminPin = sessionStorage.getItem('admin_pin') || '';
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
       
       const res = await fetch(`${apiUrl}/api/admin/posts/${postId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'x-admin-pin': adminPin
         }
       });
       

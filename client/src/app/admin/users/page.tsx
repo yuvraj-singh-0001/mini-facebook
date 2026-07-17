@@ -22,12 +22,12 @@ export default function UsersAdminPage() {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const adminPin = sessionStorage.getItem('admin_pin') || '';
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
       
       const res = await fetch(`${apiUrl}/api/admin/users`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'x-admin-pin': adminPin
         }
       });
       
@@ -47,10 +47,10 @@ export default function UsersAdminPage() {
     setLoadingDetails(true);
     setUserDetails(null);
     try {
-      const token = localStorage.getItem('token');
+      const adminPin = sessionStorage.getItem('admin_pin') || '';
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
       const res = await fetch(`${apiUrl}/api/admin/users/${userId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'x-admin-pin': adminPin }
       });
       if (!res.ok) throw new Error('Failed to fetch details');
       const data = await res.json();

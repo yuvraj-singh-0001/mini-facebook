@@ -28,12 +28,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const adminPin = sessionStorage.getItem('admin_pin') || '';
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
         
         const res = await fetch(`${apiUrl}/api/admin/stats`, {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'x-admin-pin': adminPin
           }
         });
         

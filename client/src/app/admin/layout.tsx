@@ -51,6 +51,7 @@ export default function AdminLayout({
       if (pin === '7055') {
         setIsPinVerified(true);
         sessionStorage.setItem('admin_verified', 'true');
+        sessionStorage.setItem('admin_pin', '7055');
       } else {
         setError(true);
         setPin('');

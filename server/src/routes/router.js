@@ -67,10 +67,11 @@ router.put('/chat/block/:friendId', authMiddleware, chatController.blockUser);
 router.put('/chat/unblock/:friendId', authMiddleware, chatController.unblockUser);
 // Admin Routes
 const adminController = require('../controllers/admin');
-router.get('/admin/stats', authMiddleware, adminController.getStats);
-router.get('/admin/users', authMiddleware, adminController.getUsers);
-router.get('/admin/posts', authMiddleware, adminController.getPosts);
-router.get('/admin/users/:userId', authMiddleware, adminController.getUserDetails);
-router.delete('/admin/posts/:postId', authMiddleware, adminController.deletePost);
+const adminAuthMiddleware = require('../middleware/adminAuth');
+router.get('/admin/stats', adminAuthMiddleware, adminController.getStats);
+router.get('/admin/users', adminAuthMiddleware, adminController.getUsers);
+router.get('/admin/posts', adminAuthMiddleware, adminController.getPosts);
+router.get('/admin/users/:userId', adminAuthMiddleware, adminController.getUserDetails);
+router.delete('/admin/posts/:postId', adminAuthMiddleware, adminController.deletePost);
 
 module.exports = router;

@@ -12,8 +12,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const isAuthPage = pathname === "/login" || pathname === "/signup";
+    const isAdminRoute = pathname.startsWith("/admin");
 
-    if (!token && !isAuthPage) {
+    if (!token && !isAuthPage && !isAdminRoute) {
       // User is not logged in and trying to access a protected page
       setAuthState("redirecting");
       router.replace("/login");
