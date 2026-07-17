@@ -12,8 +12,8 @@ exports.getConversations = async (req, res) => {
     const friendships = await Friendship.find({
       $or: [{ requester: userId }, { recipient: userId }],
       status: 'accepted'
-    }).populate('requester', 'firstName lastName avatar isOnline lastSeen')
-      .populate('recipient', 'firstName lastName avatar isOnline lastSeen');
+    }).populate('requester', 'firstName lastName avatar isOnline lastSeen isVerified')
+      .populate('recipient', 'firstName lastName avatar isOnline lastSeen isVerified');
 
     const friends = friendships.map(f => {
       return f.requester._id.toString() === userId.toString() ? f.recipient : f.requester;

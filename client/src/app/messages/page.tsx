@@ -13,6 +13,7 @@ import Navbar from '@/components/layout/Navbar';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { API_URL } from '@/config/api';
 import { getDefaultAvatar } from '@/lib/utils';
+import VerifiedBadge from '@/components/common/VerifiedBadge';
 
 // Types
 interface User {
@@ -23,6 +24,7 @@ interface User {
   isOnline: boolean;
   lastSeen: string;
   gender?: string;
+  isVerified?: boolean;
   blockedUsers?: string[];
 }
 
@@ -586,8 +588,9 @@ function ChatContent() {
                 </div>
                 <div className="flex-1 min-w-0 pr-1">
                   <div className="flex items-center justify-between">
-                    <h3 className={`text-[15px] truncate ${conv.unreadCount > 0 ? 'font-bold text-black' : 'font-semibold text-gray-900'}`}>
+                    <h3 className={`text-[15px] truncate flex items-center gap-1 ${conv.unreadCount > 0 ? 'font-bold text-black' : 'font-semibold text-gray-900'}`}>
                       {conv.friend.firstName} {conv.friend.lastName}
+                      {(conv.friend.isVerified || conv.friend._id === '6a59dbe1d7d3d61365e278cb') && <VerifiedBadge className="w-3.5 h-3.5" />}
                     </h3>
                     {conv.lastMessage && (
                       <span className={`text-[12px] whitespace-nowrap pl-2 ${conv.unreadCount > 0 ? 'font-bold text-black' : 'text-gray-500'}`}>
@@ -638,10 +641,11 @@ function ChatContent() {
               </div>
               <div className="flex flex-col flex-1 min-w-0">
                 <h2 
-                  className="font-bold text-[16px] text-black leading-tight truncate cursor-pointer hover:underline"
+                  className="font-bold text-[16px] text-black leading-tight truncate cursor-pointer hover:underline flex items-center gap-1"
                   onClick={() => router.push(`/profile/${activeFriend._id}`)}
                 >
                   {activeFriend.firstName} {activeFriend.lastName}
+                  {(activeFriend.isVerified || activeFriend._id === '6a59dbe1d7d3d61365e278cb') && <VerifiedBadge className="w-4 h-4" />}
                 </h2>
                 <p className="text-[12px] text-gray-500 truncate">
                   {isTyping ? (
@@ -679,10 +683,11 @@ function ChatContent() {
                 alt="avatar"
               />
               <h2 
-                className="text-[18px] font-bold text-gray-800 cursor-pointer hover:underline"
+                className="text-[18px] font-bold text-gray-800 cursor-pointer hover:underline flex items-center gap-1"
                 onClick={() => router.push(`/profile/${activeFriend._id}`)}
               >
                 {activeFriend.firstName} {activeFriend.lastName}
+                {(activeFriend.isVerified || activeFriend._id === '6a59dbe1d7d3d61365e278cb') && <VerifiedBadge className="w-5 h-5" />}
               </h2>
               <p className="text-gray-500 text-[13px]">You're friends on Facebook</p>
               <p className="text-gray-400 text-[12px] mt-1">Say hi to start chatting! 👋</p>

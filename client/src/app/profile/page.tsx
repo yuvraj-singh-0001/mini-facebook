@@ -843,12 +843,10 @@ export default function ProfilePage() {
                       {fullName}
                       {(user?.isVerified || user?._id === '6a59dbe1d7d3d61365e278cb' || user?.id === '6a59dbe1d7d3d61365e278cb') && <VerifiedBadge className="w-8 h-8" />}
                     </h1>
-                    {user?.isPublicProfile && (
-                      <span title="Public Profile" className="inline-flex items-center justify-center w-7 h-7 bg-gradient-to-r from-[#1877f2] to-[#0052cc] text-white text-base rounded-full shadow-md border border-white/40 cursor-pointer animate-in fade-in zoom-in-95">
-                        🌐
-                      </span>
-                    )}
                   </div>
+                  {user?.isPublicProfile && (
+                    <p className="text-[#65676B] font-medium text-[15px] mt-0.5">Public</p>
+                  )}
                   <p onClick={() => setActiveTab("Friends")} className="text-[#65676B] font-semibold text-[15px] hover:underline cursor-pointer mt-0.5">
                     {friends.length} {friends.length === 1 ? 'Birdie' : 'Birdies'}
                   </p>
