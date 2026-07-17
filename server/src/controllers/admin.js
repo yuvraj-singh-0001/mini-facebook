@@ -22,7 +22,9 @@ exports.getStats = async (req, res) => {
 
     const calculateTrend = (current, previous) => {
       if (previous === 0) return current > 0 ? 100 : 0;
-      return Math.round(((current - previous) / previous) * 100);
+      let rawPercentage = Math.round(((current - previous) / previous) * 100);
+      // Cap the percentage between -100% and +100%
+      return Math.max(Math.min(rawPercentage, 100), -100);
     };
 
     const usersTrend = calculateTrend(newUsersThisMonth, newUsersLastMonth);
@@ -163,5 +165,46 @@ exports.deletePost = async (req, res) => {
   } catch (error) {
     console.error('Error in admin deletePost:', error);
     res.status(500).json({ message: 'Server error deleting post' });
+  }
+};
+
+exports.getUserDetails = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const totalPosts = await Post.countDocuments({ user: userId });
+    
+    // Friends
+    const totalFriends = await require('../models/Friendship').countDocuments({
+      $or: [{ requester: userId }, { recipient: userId }],
+      status: 'accepted'
+    });
+
+    const pendingRequests = await require('../models/Friendship').countDocuments({
+      recipient: userId,
+      status: 'pending'
+    });
+
+    // Unique messaged users
+    const Message = require('../models/Message');
+    const sentMessages = await Message.distinct('receiver', { sender: userId });
+    const receivedMessages = await Message.distinct('sender', { receiver: userId });
+    const uniqueMessagedUsers = new Set([...sentMessages.map(id => id.toString()), ...receivedMessages.map(id => id.toString())]);
+    const totalMessaged = uniqueMessagedUsers.size;
+
+    res.json({
+      user,
+      stats: {
+        totalPosts,
+        totalFriends,
+        pendingRequests,
+        totalMessaged
+      }
+    });
+  } catch (error) {
+    console.error('Error in admin getUserDetails:', error);
+    res.status(500).json({ message: 'Server error fetching user details' });
   }
 };
