@@ -125,10 +125,15 @@ export default function PostComponent({ post: initialPost, currentUser, isProfil
 
     try {
       const token = localStorage.getItem('token');
-      await fetch(`${API_URL}/api/posts/${post._id}/like`, {
+      const res = await fetch(`${API_URL}/api/posts/${post._id}/like`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
       });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || 'Failed to like post');
+      if (typeof data.likesCount === 'number') {
+        setPost((prev: any) => ({ ...prev, hasLiked: data.hasLiked ?? prev.hasLiked, likesCount: data.likesCount }));
+      }
     } catch (error) {
       console.error(error);
       setPost({
@@ -157,7 +162,7 @@ export default function PostComponent({ post: initialPost, currentUser, isProfil
   const loadComments = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/api/posts/${post._id}/comments`, {
+      const res = await fetch(`${API_URL}/api/posts/${post._id}/comments?page=1&limit=30`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -194,6 +199,8 @@ export default function PostComponent({ post: initialPost, currentUser, isProfil
         setComments([...comments, data.comment]);
         setNewComment('');
         setPost({ ...post, commentsCount: post.commentsCount + 1 });
+      } else {
+        throw new Error(data.message || 'Failed to add comment');
       }
     } catch (error) {
       console.error(error);
@@ -465,6 +472,11 @@ export default function PostComponent({ post: initialPost, currentUser, isProfil
       {post.image && (
         <div className="rounded-lg overflow-hidden border border-gray-200 -mx-4 mb-3 max-h-[600px] flex items-center justify-center bg-black">
           <img src={post.image} alt="Post content" loading="lazy" decoding="async" className="w-full max-h-[600px] object-contain" />
+        </div>
+      )}
+      {post.imageSkipped && (
+        <div className="rounded-lg border border-gray-200 -mx-4 mb-3 bg-gray-50 px-4 py-6 text-center text-sm text-gray-500">
+          Large photo feed fast rakhne ke liye yahan skip ki gayi hai. Profile par post open karke dekh sakte ho.
         </div>
       )}
 

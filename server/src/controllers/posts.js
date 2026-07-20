@@ -6,6 +6,22 @@ const Comment = require('../models/Comment');
 // Friendship cache — friendships change very rarely, no need to re-query on every scroll
 const friendsCache = new Map(); // key: userId, value: { friendIds, expiresAt }
 const FRIENDS_CACHE_TTL = 10 * 1000; // 10 seconds
+const MAX_FEED_LIMIT = 5;
+const MAX_REELS_LIMIT = 10;
+const MAX_INLINE_IMAGE_CHARS = 900_000;
+const MAX_IMAGE_UPLOAD_CHARS = 8_000_000;
+
+function isBase64Data(value) {
+  return typeof value === 'string' && value.startsWith('data:');
+}
+
+function trimHeavyFeedMedia(post) {
+  if (isBase64Data(post.image) && post.image.length > MAX_INLINE_IMAGE_CHARS) {
+    post.image = '';
+    post.imageSkipped = true;
+  }
+  return post;
+}
 
 async function getCachedFriendIds(userId) {
   const key = userId.toString();
@@ -17,7 +33,7 @@ async function getCachedFriendIds(userId) {
   const friendships = await Friendship.find({
     $or: [{ requester: userId }, { recipient: userId }],
     status: 'accepted'
-  }).select('requester recipient').lean();
+  }).select('requester recipient').maxTimeMS(5000).lean();
 
   const friendIds = friendships.map(f =>
     f.requester.toString() === key ? f.recipient : f.requester
@@ -35,6 +51,12 @@ exports.createPost = async (req, res) => {
     if (!content && !image && !video) {
       return res.status(400).json({ message: 'Post must have text, image, or video' });
     }
+    if (isBase64Data(video)) {
+      return res.status(400).json({ message: 'Please upload videos as a URL. Direct video files are too heavy for feed performance.' });
+    }
+    if (isBase64Data(image) && image.length > MAX_IMAGE_UPLOAD_CHARS) {
+      return res.status(400).json({ message: 'Image is too large. Please upload an image under 5MB.' });
+    }
 
     const newPost = new Post({
       user: userId,
@@ -44,6 +66,8 @@ exports.createPost = async (req, res) => {
       mediaType: mediaType || (video ? 'reel' : 'post'),
       viewedBy: [userId],
       viewsCount: 1,
+      likesCount: 0,
+      commentsCount: 0,
       isOfficial: userId.toString() === '6a59dbe1d7d3d61365e278cb'
     });
 
@@ -89,7 +113,8 @@ exports.getFeed = async (req, res) => {
   try {
     const userId = req.user._id;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const requestedLimit = parseInt(req.query.limit) || 5;
+    const limit = Math.min(Math.max(requestedLimit, 1), MAX_FEED_LIMIT);
     const skip = (page - 1) * limit;
 
     // Get friends (cached for 10s to avoid repeat queries on pagination)
@@ -99,37 +124,31 @@ exports.getFeed = async (req, res) => {
     const feedUserIds = [...friendIds, userId];
 
     // Fetch posts — exclude viewedBy AND likes array (we only need hasLiked + count)
-    const posts = await Post.find({ user: { $in: feedUserIds } })
-      .select('-viewedBy')
-      .sort({ isOfficial: -1, createdAt: -1 })
+    const posts = await Post.find({
+      user: { $in: feedUserIds },
+      mediaType: { $nin: ['reel', 'video'] },
+      video: { $in: ['', null] }
+    })
+      .select('user content image mediaType likes likesCount commentsCount sharesCount viewsCount isOfficial createdAt updatedAt editedAt')
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit + 1)
+      .maxTimeMS(5000)
       .populate('user', 'firstName lastName avatar gender isVerified')
       .lean();
 
     const hasMore = posts.length > limit;
     const postsPage = hasMore ? posts.slice(0, limit) : posts;
 
-    // Get comments count in parallel
-    const postIds = postsPage.map(p => p._id);
-    const comments = await Comment.aggregate([
-      { $match: { post: { $in: postIds } } },
-      { $group: { _id: '$post', count: { $sum: 1 } } }
-    ]);
-
-    // Build fast lookup map
-    const commentMap = {};
-    comments.forEach(c => { commentMap[c._id.toString()] = c.count; });
-
     const formattedPosts = postsPage.map(post => {
       const { likes, ...rest } = post; // Strip likes array from response
-      return {
+      return trimHeavyFeedMedia({
         ...rest,
-        commentsCount: commentMap[post._id.toString()] || 0,
-        hasLiked: likes.some(id => id.toString() === userId.toString()),
-        likesCount: likes.length,
+        commentsCount: post.commentsCount || 0,
+        hasLiked: likes?.some(id => id.toString() === userId.toString()) || false,
+        likesCount: post.likesCount || likes?.length || 0,
         viewsCount: post.viewsCount || 0
-      };
+      });
     });
 
     res.status(200).json({ 
@@ -175,7 +194,7 @@ exports.getUserPosts = async (req, res) => {
         ...rest,
         commentsCount: commentMap[post._id.toString()] || 0,
         hasLiked: likes.some(id => id.toString() === currentUserId.toString()),
-        likesCount: likes.length,
+        likesCount: post.likesCount || likes.length,
         viewsCount: post.viewsCount || 0
       };
     });
@@ -192,30 +211,49 @@ exports.likePost = async (req, res) => {
     const postId = req.params.postId;
     const userId = req.user._id;
 
-    const post = await Post.findById(postId);
-    if (!post) return res.status(404).json({ message: 'Post not found' });
+    let updatedPost = await Post.findOneAndUpdate(
+      { _id: postId, likes: userId },
+      { $pull: { likes: userId }, $inc: { likesCount: -1 } },
+      { returnDocument: 'after' }
+    ).select('user likes likesCount').maxTimeMS(5000).lean();
 
-    const hasLiked = post.likes.includes(userId);
-    if (hasLiked) {
-      post.likes.pull(userId);
-    } else {
-      post.likes.push(userId);
-      
-      // Notify post owner
-      if (post.user.toString() !== userId.toString()) {
-        const notification = new Notification({
-          recipient: post.user,
-          sender: userId,
-          type: 'like',
-          referenceId: post._id,
-          message: `${req.user.firstName} ${req.user.lastName} liked your post.`
-        });
-        await notification.save();
-      }
+    if (updatedPost) {
+      const exactLikesCount = updatedPost.likes?.length || 0;
+      Post.updateOne({ _id: postId }, { $set: { likesCount: exactLikesCount } })
+        .catch(err => console.error('likesCount sync failed:', err.message));
+      return res.status(200).json({
+        message: 'Unliked',
+        hasLiked: false,
+        likesCount: exactLikesCount
+      });
     }
 
-    await post.save();
-    res.status(200).json({ message: hasLiked ? 'Unliked' : 'Liked', likesCount: post.likes.length });
+    updatedPost = await Post.findOneAndUpdate(
+      { _id: postId, likes: { $ne: userId } },
+      { $addToSet: { likes: userId }, $inc: { likesCount: 1 } },
+      { returnDocument: 'after' }
+    ).select('user likes likesCount').maxTimeMS(5000).lean();
+
+    if (!updatedPost) return res.status(404).json({ message: 'Post not found' });
+    const exactLikesCount = updatedPost.likes?.length || 0;
+    Post.updateOne({ _id: postId }, { $set: { likesCount: exactLikesCount } })
+      .catch(err => console.error('likesCount sync failed:', err.message));
+
+    if (updatedPost.user.toString() !== userId.toString()) {
+      Notification.create({
+        recipient: updatedPost.user,
+        sender: userId,
+        type: 'like',
+        referenceId: updatedPost._id,
+        message: `${req.user.firstName} ${req.user.lastName} liked your post.`
+      }).catch(err => console.error('Like notification failed:', err.message));
+    }
+
+    res.status(200).json({
+      message: 'Liked',
+      hasLiked: true,
+      likesCount: exactLikesCount
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error liking post' });
@@ -257,21 +295,21 @@ exports.viewPost = async (req, res) => {
   try {
     const postId = req.params.postId;
     const userId = req.user._id;
-    const post = await Post.findById(postId);
-    if (!post) return res.status(404).json({ message: 'Post not found' });
 
-    const hasViewed = post.viewedBy && post.viewedBy.some(id => id.toString() === userId.toString());
-    if (!hasViewed) {
-      post.viewedBy = post.viewedBy || [];
-      post.viewedBy.push(userId);
-      post.viewsCount = post.viewedBy.length;
-      await post.save();
-    } else {
-      post.viewsCount = post.viewedBy ? post.viewedBy.length : 0;
-      if (post.isModified('viewsCount')) await post.save();
+    const updatedPost = await Post.findOneAndUpdate(
+      { _id: postId, user: { $ne: userId }, viewedBy: { $ne: userId } },
+      { $addToSet: { viewedBy: userId }, $inc: { viewsCount: 1 } },
+      { returnDocument: 'after' }
+    ).select('viewsCount').maxTimeMS(5000).lean();
+
+    if (updatedPost) {
+      return res.status(200).json({ message: 'View recorded', viewsCount: updatedPost.viewsCount || 0 });
     }
 
-    res.status(200).json({ message: 'View recorded', viewsCount: post.viewedBy ? post.viewedBy.length : 0 });
+    const post = await Post.findById(postId).select('viewsCount').maxTimeMS(5000).lean();
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    res.status(200).json({ message: 'View already recorded', viewsCount: post.viewsCount || 0 });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error recording view' });
@@ -282,7 +320,8 @@ exports.getReels = async (req, res) => {
   try {
     const userId = req.user._id;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const requestedLimit = parseInt(req.query.limit) || 6;
+    const limit = Math.min(Math.max(requestedLimit, 1), MAX_REELS_LIMIT);
     const skip = (page - 1) * limit;
 
     // Single optimized query: filter + sort + paginate + populate in MongoDB
@@ -297,6 +336,7 @@ exports.getReels = async (req, res) => {
       .sort({ isOfficial: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
+      .maxTimeMS(8000)
       .populate('user', 'firstName lastName avatar isOnline gender isVerified')
       .lean();
 
@@ -309,7 +349,7 @@ exports.getReels = async (req, res) => {
     const comments = await Comment.aggregate([
       { $match: { post: { $in: reelIds } } },
       { $group: { _id: '$post', count: { $sum: 1 } } }
-    ]);
+    ]).option({ maxTimeMS: 5000 });
 
     // Build a fast lookup map instead of .find() per reel
     const commentMap = {};
@@ -322,7 +362,7 @@ exports.getReels = async (req, res) => {
         ...rest,
         commentsCount: commentMap[reel._id.toString()] || 0,
         hasLiked: likes?.some(id => id.toString() === userId.toString()) || false,
-        likesCount,
+        likesCount: reel.likesCount || likesCount,
         viewsCount: reel.viewsCount || 0
       };
     });

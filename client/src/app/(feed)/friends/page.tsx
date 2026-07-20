@@ -12,6 +12,7 @@ export default function FriendsPage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   // Track which user IDs are currently loading (button spinner)
   const [actionLoading, setActionLoading] = useState<Set<string>>(new Set());
 
@@ -20,27 +21,50 @@ export default function FriendsPage() {
   }, []);
 
   const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     try {
       const token = localStorage.getItem("token");
-      if (!token) return;
+      if (!token) {
+        setLoading(false);
+        setError("Not logged in. Please login again.");
+        return;
+      }
+
+      const controller = new AbortController();
+      timeoutId = setTimeout(() => controller.abort(), 20000);
 
       const [reqRes, usersRes] = await Promise.all([
         fetch(`${API_URL}/api/friends/requests`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
         }),
-        fetch(`${API_URL}/api/users`, {
+        fetch(`${API_URL}/api/users?page=1&limit=30`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
         }),
       ]);
 
       const reqData = await reqRes.json();
       const usersData = await usersRes.json();
 
+      if (!reqRes.ok || !usersRes.ok) {
+        const message = usersData?.message || reqData?.message || "Mitra data load nahi hua.";
+        throw new Error(message);
+      }
+
       if (reqRes.ok) setRequests(reqData.requests || []);
       if (usersRes.ok) setUsers(usersData.users || []);
-    } catch (error) {
-      console.error(error);
+    } catch (err: any) {
+      console.error("fetchData error:", err);
+      if (err?.name === "AbortError") {
+        setError("Server se connection timeout ho gaya. Server check karo aur Retry karo.");
+      } else {
+        setError(err?.message || "Data load nahi hua. Connection check karo.");
+      }
     } finally {
+      if (timeoutId) clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -206,7 +230,20 @@ export default function FriendsPage() {
       </div>
 
       {loading ? (
-        <div className="text-center text-gray-500 py-10">Loading...</div>
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <div className="w-10 h-10 border-4 border-[#1877f2] border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-500 text-[15px]">Loading Mitra data...</p>
+        </div>
+      ) : error ? (
+        <div className="text-center py-10">
+          <p className="text-red-500 font-medium">{error}</p>
+          <button
+            onClick={fetchData}
+            className="mt-3 px-4 py-2 bg-[#1877f2] text-white rounded-lg font-semibold text-[14px] hover:bg-[#166fe5] transition-colors"
+          >
+            Retry
+          </button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-10">
 

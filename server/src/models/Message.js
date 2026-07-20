@@ -46,5 +46,7 @@ const messageSchema = new mongoose.Schema({
 // Indexes to quickly find messages between two users
 messageSchema.index({ sender: 1, receiver: 1 });
 messageSchema.index({ receiver: 1, sender: 1 });
+messageSchema.index({ sender: 1, receiver: 1, createdAt: -1 });
+messageSchema.index({ receiver: 1, status: 1, isDeletedForEveryone: 1 });
 
 module.exports = mongoose.model('Message', messageSchema);

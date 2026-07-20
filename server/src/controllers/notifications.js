@@ -7,9 +7,10 @@ exports.getNotifications = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(30)
       .populate('sender', 'firstName lastName avatar gender')
+      .maxTimeMS(5000)
       .lean();
 
-    const unreadCount = await Notification.countDocuments({ recipient: userId, isRead: false });
+    const unreadCount = await Notification.countDocuments({ recipient: userId, isRead: false }).maxTimeMS(5000);
 
     res.status(200).json({ notifications, unreadCount });
   } catch (error) {
@@ -24,7 +25,7 @@ exports.markAsRead = async (req, res) => {
     await Notification.updateMany(
       { recipient: userId, isRead: false },
       { $set: { isRead: true } }
-    );
+    ).maxTimeMS(5000);
     res.status(200).json({ message: 'Notifications marked as read' });
   } catch (error) {
     console.error(error);
@@ -35,7 +36,7 @@ exports.markAsRead = async (req, res) => {
 exports.clearNotifications = async (req, res) => {
   try {
     const userId = req.user._id;
-    await Notification.deleteMany({ recipient: userId });
+    await Notification.deleteMany({ recipient: userId }).maxTimeMS(5000);
     res.status(200).json({ message: 'All notifications cleared' });
   } catch (error) {
     console.error(error);

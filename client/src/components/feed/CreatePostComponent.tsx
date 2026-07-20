@@ -16,21 +16,21 @@ export default function CreatePostComponent({ currentUser, onPostCreated }: { cu
   const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 40 * 1024 * 1024) {
-        alert("File size exceeds 40MB. Please use a smaller file or paste a Video URL.");
+      if (file.type.startsWith('video/')) {
+        alert("Direct video upload ab disabled hai. Feed fast rakhne ke liye Paste Video URL use karo.");
+        e.target.value = '';
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image 5MB se chhoti honi chahiye. Large image feed ko slow kar deti hai.");
+        e.target.value = '';
         return;
       }
       const reader = new FileReader();
       reader.onloadend = () => {
-        if (file.type.startsWith('video/')) {
-          setVideo(reader.result as string);
-          setImage('');
-          setMediaType('reel');
-        } else {
-          setImage(reader.result as string);
-          setVideo('');
-          setMediaType('post');
-        }
+        setImage(reader.result as string);
+        setVideo('');
+        setMediaType('post');
       };
       reader.readAsDataURL(file);
     }
@@ -192,11 +192,14 @@ export default function CreatePostComponent({ currentUser, onPostCreated }: { cu
           <input type="file" accept="image/*" onChange={handleMediaChange} className="hidden" />
         </label>
         
-        <label className="flex-1 flex items-center justify-center gap-1.5 p-2 hover:bg-[#f0f2f5] rounded-lg transition-colors text-[#65676B] font-semibold cursor-pointer text-sm sm:text-base">
+        <button 
+          type="button"
+          onClick={() => setShowUrlInput(!showUrlInput)}
+          className="flex-1 flex items-center justify-center gap-1.5 p-2 hover:bg-[#f0f2f5] rounded-lg transition-colors text-[#65676B] font-semibold cursor-pointer text-sm sm:text-base"
+        >
           <span className="text-red-500"><Video size={22} /></span>
-          <span>Reel / Video</span>
-          <input type="file" accept="video/*,image/*" onChange={handleMediaChange} className="hidden" />
-        </label>
+          <span>Reel URL</span>
+        </button>
 
         <button 
           onClick={() => setShowUrlInput(!showUrlInput)}

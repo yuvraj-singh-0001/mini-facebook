@@ -13,7 +13,10 @@ exports.getConversations = async (req, res) => {
       $or: [{ requester: userId }, { recipient: userId }],
       status: 'accepted'
     }).populate('requester', 'firstName lastName avatar isOnline lastSeen isVerified')
-      .populate('recipient', 'firstName lastName avatar isOnline lastSeen isVerified');
+      .populate('recipient', 'firstName lastName avatar isOnline lastSeen isVerified')
+      .limit(100)
+      .maxTimeMS(8000)
+      .lean();
 
     const friends = friendships.map(f => {
       return f.requester._id.toString() === userId.toString() ? f.recipient : f.requester;
@@ -28,7 +31,7 @@ exports.getConversations = async (req, res) => {
         ],
         isDeletedForMe: { $ne: userId },
         isDeletedForEveryone: false
-      }).sort({ createdAt: -1 });
+      }).sort({ createdAt: -1 }).maxTimeMS(5000).lean();
 
       // Unread count
       const unreadCount = await Message.countDocuments({
@@ -36,7 +39,7 @@ exports.getConversations = async (req, res) => {
         receiver: userId,
         status: { $ne: 'seen' },
         isDeletedForEveryone: false
-      });
+      }).maxTimeMS(5000);
 
       return {
         friend,
@@ -67,7 +70,7 @@ exports.getUnreadCount = async (req, res) => {
       receiver: userId,
       status: { $ne: 'seen' },
       isDeletedForEveryone: false
-    });
+    }).maxTimeMS(5000);
     res.status(200).json({ unreadCount });
   } catch (error) {
     console.error('Error fetching unread count:', error);
@@ -80,6 +83,9 @@ exports.getMessages = async (req, res) => {
   try {
     const userId = req.user._id;
     const { friendId } = req.params;
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const requestedLimit = parseInt(req.query.limit, 10) || 50;
+    const limit = Math.min(Math.max(requestedLimit, 1), 100);
 
     const messages = await Message.find({
       $or: [
@@ -87,9 +93,14 @@ exports.getMessages = async (req, res) => {
         { sender: friendId, receiver: userId }
       ],
       isDeletedForMe: { $ne: userId }, // Not deleted for me
-    }).sort({ createdAt: 1 });
+    })
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .maxTimeMS(8000)
+      .lean();
 
-    res.status(200).json(messages);
+    res.status(200).json(messages.reverse());
   } catch (error) {
     console.error('Error fetching messages:', error);
     res.status(500).json({ message: 'Server error' });
@@ -105,7 +116,7 @@ exports.markAsSeen = async (req, res) => {
     await Message.updateMany(
       { sender: friendId, receiver: userId, status: { $ne: 'seen' } },
       { $set: { status: 'seen' } }
-    );
+    ).maxTimeMS(5000);
 
     res.status(200).json({ message: 'Messages marked as seen' });
   } catch (error) {
@@ -122,7 +133,7 @@ exports.blockUser = async (req, res) => {
 
     await User.findByIdAndUpdate(userId, {
       $addToSet: { blockedUsers: friendId }
-    });
+    }).maxTimeMS(5000);
 
     res.status(200).json({ message: 'User blocked successfully' });
   } catch (error) {
@@ -139,7 +150,7 @@ exports.unblockUser = async (req, res) => {
 
     await User.findByIdAndUpdate(userId, {
       $pull: { blockedUsers: friendId }
-    });
+    }).maxTimeMS(5000);
 
     res.status(200).json({ message: 'User unblocked successfully' });
   } catch (error) {

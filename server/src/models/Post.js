@@ -26,6 +26,14 @@ const postSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  likesCount: {
+    type: Number,
+    default: 0
+  },
+  commentsCount: {
+    type: Number,
+    default: 0
+  },
   viewedBy: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
@@ -52,7 +60,9 @@ const postSchema = new mongoose.Schema({
 postSchema.index({ isOfficial: -1, createdAt: -1 }); // Global feed prioritizes official posts
 postSchema.index({ createdAt: -1 }); // Global feed backup
 postSchema.index({ user: 1, createdAt: -1 }); // Profile feed
+postSchema.index({ user: 1, isOfficial: -1, createdAt: -1 }); // Friend feed
 postSchema.index({ mediaType: 1, createdAt: -1 }); // Reels feed - fast filter by mediaType
+postSchema.index({ mediaType: 1, isOfficial: -1, createdAt: -1 }); // Reels sorted feed
 postSchema.index({ video: 1 }); // Reels feed - fast filter by video field
 
 module.exports = mongoose.model('Post', postSchema);

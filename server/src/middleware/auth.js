@@ -50,7 +50,7 @@ const authMiddleware = async (req, res, next) => {
     // Try cache first (avoids MongoDB round-trip)
     let user = getCachedUser(userId);
     if (!user) {
-      user = await User.findById(userId).select('-password -avatar').lean();
+      user = await User.findById(userId).select('-password -avatar').maxTimeMS(10000).lean();
       if (user) setCachedUser(userId, user);
     }
 

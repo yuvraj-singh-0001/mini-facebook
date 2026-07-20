@@ -9,7 +9,7 @@ export default function FeedLayout({ children }: { children: React.ReactNode }) 
       <Navbar />
       <div className="flex w-full justify-center">
         <Sidebar />
-        <main className="flex-1 w-full max-w-[680px] mt-4 xl:ml-[300px] lg:mr-[300px] px-4">
+        <main className="flex-1 w-full mt-4 xl:ml-[300px] lg:mr-[300px] px-4">
           {children}
         </main>
         <RightPanel />

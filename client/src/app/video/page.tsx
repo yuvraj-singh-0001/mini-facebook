@@ -58,10 +58,13 @@ export default function VideoFeedPage() {
 
     // Fetch fresh reels in background
     const fetchReels = async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${API_URL}/api/posts/reels`, {
-          headers: { Authorization: `Bearer ${token}` }
+        const res = await fetch(`${API_URL}/api/posts/reels?page=1&limit=5`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal
         });
         if (res.ok) {
           const data = await res.json();
@@ -79,6 +82,7 @@ export default function VideoFeedPage() {
       } catch (error) {
         console.error("Failed to load global reels:", error);
       } finally {
+        clearTimeout(timeoutId);
         setLoading(false);
       }
     };
@@ -133,10 +137,19 @@ export default function VideoFeedPage() {
       return r;
     }));
     try {
-      await fetch(`${API_URL}/api/posts/${reelId}/like`, {
+      const res = await fetch(`${API_URL}/api/posts/${reelId}/like`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
       });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || 'Failed to toggle like');
+      if (typeof data.likesCount === 'number') {
+        setReels(prev => prev.map(r => r._id === reelId ? {
+          ...r,
+          hasLiked: data.hasLiked ?? r.hasLiked,
+          likes: data.likesCount
+        } : r));
+      }
     } catch (err) {
       console.error('Failed to toggle like:', err);
       // Revert on error
@@ -160,7 +173,7 @@ export default function VideoFeedPage() {
     setCommentLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/api/posts/${reelId}/comments`, {
+      const res = await fetch(`${API_URL}/api/posts/${reelId}/comments?page=1&limit=30`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {

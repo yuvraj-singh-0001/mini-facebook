@@ -7,8 +7,8 @@ import StoriesSection from "@/components/feed/StoriesSection";
 import { useRouter } from "next/navigation";
 import { API_URL } from "@/config/api";
 
-const CACHE_KEY = "fb_feed_cache";
-const PAGE_SIZE = 10;
+const CACHE_KEY = "fb_feed_cache_v2";
+const PAGE_SIZE = 5;
 
 // Skeleton loader for posts
 function PostSkeleton() {
@@ -113,11 +113,16 @@ export default function MainFeedPage() {
   }, [setupObserver]);
 
   const fetchFeed = async (pageNum: number, replace: boolean, retryCount = 0) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
         `${API_URL}/api/posts/feed?page=${pageNum}&limit=${PAGE_SIZE}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        }
       );
 
       if (res.status === 401) {
@@ -149,19 +154,20 @@ export default function MainFeedPage() {
           setError(data.message || "Failed to load feed.");
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       // Automatically retry up to 2 times if server was restarting
-      if (retryCount < 2) {
+      if (err?.name !== "AbortError" && retryCount < 2) {
         setTimeout(() => {
           fetchFeed(pageNum, replace, retryCount + 1);
         }, 1000);
         return;
       }
       if (replace && posts.length === 0) {
-        setError("Network error. Please check your connection.");
+        setError(err?.name === "AbortError" ? "Feed load timeout. Server/DB check karo. Heavy media posts skip karke Retry karo." : "Network error. Please check your connection.");
       }
     } finally {
+      clearTimeout(timeoutId);
       setInitialLoading(false);
       setLoadingMore(false);
       setFeedLoaded(true);

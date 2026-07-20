@@ -3,10 +3,11 @@ const Message = require('./models/Message');
 const User = require('./models/User');
 const BadWord = require('./models/BadWord');
 const ModerationLog = require('./models/ModerationLog');
+const mongoose = require('mongoose');
 
 const setupSocket = (server) => {
   const io = new Server(server, {
-    maxHttpBufferSize: 5e7, // 50 MB to allow high quality images
+    maxHttpBufferSize: 5e6,
     cors: {
       origin: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -15,6 +16,25 @@ const setupSocket = (server) => {
   });
 
   const onlineUsers = new Map(); // socket.id -> userId
+  const userConnectionCounts = new Map(); // userId -> active socket count
+  let badWordsCache = { words: [], expiresAt: 0 };
+
+  async function getBadWords() {
+    if (Date.now() < badWordsCache.expiresAt) {
+      return badWordsCache.words;
+    }
+
+    const words = await BadWord.find({})
+      .select('word category')
+      .maxTimeMS(5000)
+      .lean();
+    badWordsCache = { words, expiresAt: Date.now() + 5 * 60 * 1000 };
+    return words;
+  }
+
+  function isDbReady() {
+    return mongoose.connection.readyState === 1;
+  }
 
   io.on('connection', async (socket) => {
     console.log('A user connected:', socket.id);
@@ -24,9 +44,13 @@ const setupSocket = (server) => {
       socket.join(userId);
       onlineUsers.set(socket.id, userId);
 
-      // Update user status
-      await User.findByIdAndUpdate(userId, { isOnline: true });
-      socket.broadcast.emit('user_status_change', { userId, isOnline: true });
+      const currentCount = userConnectionCounts.get(userId) || 0;
+      userConnectionCounts.set(userId, currentCount + 1);
+
+      if (currentCount === 0 && isDbReady()) {
+        await User.findByIdAndUpdate(userId, { isOnline: true }).maxTimeMS(5000);
+        socket.broadcast.emit('user_status_change', { userId, isOnline: true });
+      }
       
       console.log(`User ${userId} joined room ${userId}`);
     });
@@ -34,10 +58,16 @@ const setupSocket = (server) => {
     // Send Message
     socket.on('send_message', async (data, callback) => {
       try {
+        if (!isDbReady()) {
+          return callback?.({ status: 'error', error: 'Server database is connecting. Please retry.' });
+        }
         const { sender, receiver, content, type, imageUrl } = data;
+        if (type === 'text' && (!content || content.length > 1000)) {
+          return callback?.({ status: 'error', error: 'Message is too long.' });
+        }
         
         if (type === 'text' && content) {
-          const badWordsData = await BadWord.find({});
+          const badWordsData = await getBadWords();
           
           const lowerContent = content.toLowerCase();
           // Remove ALL non-alphanumeric characters (spaces, symbols, emojis, etc.) but keep letters from all languages
@@ -67,7 +97,7 @@ const setupSocket = (server) => {
               caughtCategories
             });
             
-            const offenseCount = await ModerationLog.countDocuments({ userId: sender });
+            const offenseCount = await ModerationLog.countDocuments({ userId: sender }).maxTimeMS(5000);
             let isDeactivated = false;
             
             if (offenseCount > 3) {
@@ -117,7 +147,7 @@ const setupSocket = (server) => {
 
         if (isReceiverOnline) {
           savedMessage.status = 'delivered';
-          await savedMessage.save();
+          await Message.updateOne({ _id: savedMessage._id }, { $set: { status: 'delivered' } }).maxTimeMS(5000);
         }
 
         // Emit to receiver's room
@@ -146,10 +176,11 @@ const setupSocket = (server) => {
     // Message status updates
     socket.on('message_seen', async ({ messageIds, sender, receiver }) => {
       try {
+        if (!isDbReady()) return;
         await Message.updateMany(
           { _id: { $in: messageIds } },
           { $set: { status: 'seen' } }
-        );
+        ).maxTimeMS(5000);
         socket.to(receiver).emit('messages_seen_update', { messageIds, receiver: sender });
       } catch (error) {
         console.error('Error updating message status:', error);
@@ -158,9 +189,10 @@ const setupSocket = (server) => {
 
     socket.on('delete_for_me', async ({ messageId, userId }) => {
       try {
+        if (!isDbReady()) return;
         await Message.findByIdAndUpdate(messageId, {
           $addToSet: { isDeletedForMe: userId }
-        });
+        }).maxTimeMS(5000);
       } catch (error) {
         console.error('Error deleting for me:', error);
       }
@@ -168,9 +200,10 @@ const setupSocket = (server) => {
 
     socket.on('delete_for_everyone', async ({ messageId, receiver }) => {
       try {
+        if (!isDbReady()) return;
         await Message.findByIdAndUpdate(messageId, {
           isDeletedForEveryone: true
-        });
+        }).maxTimeMS(5000);
         // Notify the receiver
         socket.to(receiver).emit('message_deleted', { messageId });
       } catch (error) {
@@ -180,10 +213,11 @@ const setupSocket = (server) => {
 
     socket.on('edit_message', async ({ messageId, content, receiver }) => {
       try {
+        if (!isDbReady()) return;
         const updatedMsg = await Message.findByIdAndUpdate(messageId, {
           content,
           isEdited: true
-        }, { new: true });
+        }, { new: true }).maxTimeMS(5000);
         
         socket.to(receiver).emit('message_edited', updatedMsg);
       } catch (error) {
@@ -198,18 +232,26 @@ const setupSocket = (server) => {
       if (userId) {
         // Remove from map
         onlineUsers.delete(socket.id);
-        
-        // Update user status
-        await User.findByIdAndUpdate(userId, { 
-          isOnline: false,
-          lastSeen: new Date()
-        });
-        
-        socket.broadcast.emit('user_status_change', { 
-          userId, 
-          isOnline: false,
-          lastSeen: new Date()
-        });
+
+        const currentCount = userConnectionCounts.get(userId) || 1;
+        if (currentCount <= 1) {
+          userConnectionCounts.delete(userId);
+          const lastSeen = new Date();
+          if (isDbReady()) {
+            await User.findByIdAndUpdate(userId, {
+              isOnline: false,
+              lastSeen
+            }).maxTimeMS(5000);
+
+            socket.broadcast.emit('user_status_change', {
+              userId,
+              isOnline: false,
+              lastSeen
+            });
+          }
+        } else {
+          userConnectionCounts.set(userId, currentCount - 1);
+        }
       }
     });
   });

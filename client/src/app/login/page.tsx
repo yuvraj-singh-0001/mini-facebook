@@ -16,6 +16,8 @@ export default function Login() {
     setError("");
     setLoading(true);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
     try {
       let response: Response;
       try {
@@ -23,9 +25,13 @@ export default function Login() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ emailOrPhone: email, password }),
+          signal: controller.signal,
         });
-      } catch {
+      } catch (err: any) {
         // Network error - server not reachable
+        if (err?.name === "AbortError") {
+          throw new Error("Login timeout ho gaya. Server ya database connection check karo.");
+        }
         throw new Error("Unable to connect to server. Please check your internet connection and try again.");
       }
 
@@ -39,6 +45,8 @@ export default function Login() {
         throw new Error(data.message || "⚠️ Your account has been suspended. Please contact support.");
       } else if (response.status === 500) {
         throw new Error("⚠️ Server error. Please try again later.");
+      } else if (response.status === 503) {
+        throw new Error(data.message || "Server database se connect nahi ho pa raha. Please retry.");
       } else if (!response.ok) {
         throw new Error(data.message || "Something went wrong. Please try again.");
       }
@@ -50,6 +58,7 @@ export default function Login() {
     } catch (err: any) {
       setError(err.message);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };

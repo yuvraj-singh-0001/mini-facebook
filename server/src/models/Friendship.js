@@ -23,6 +23,7 @@ friendshipSchema.index({ requester: 1, recipient: 1 }, { unique: true });
 
 // Index for getting pending requests quickly
 friendshipSchema.index({ recipient: 1, status: 1 });
+friendshipSchema.index({ requester: 1, status: 1 });
 
 // Index for getting accepted friends quickly
 friendshipSchema.index({ status: 1 });

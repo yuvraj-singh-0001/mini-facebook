@@ -24,7 +24,7 @@ exports.sendRequest = async (req, res) => {
         { requester: requesterId, recipient: recipientId },
         { requester: recipientId, recipient: requesterId }
       ]
-    }).lean();
+    }).maxTimeMS(8000).lean();
 
     if (existingFriendship) {
       if (existingFriendship.status === 'accepted') {
@@ -73,7 +73,7 @@ exports.acceptRequest = async (req, res) => {
     const request = await Friendship.findOneAndUpdate(
       { requester: requesterId, recipient: recipientId, status: 'pending' },
       { status: 'accepted' },
-      { returnDocument: 'after' }
+      { returnDocument: 'after', maxTimeMS: 8000 }
     );
 
     if (!request) {
@@ -112,7 +112,7 @@ exports.rejectRequest = async (req, res) => {
       requester: requesterId,
       recipient: recipientId,
       status: 'pending'
-    });
+    }).maxTimeMS(8000);
 
     if (!request) {
       return res.status(404).json({ message: 'Friend request not found' });
@@ -135,7 +135,7 @@ exports.cancelRequest = async (req, res) => {
       requester: requesterId,
       recipient: recipientId,
       status: 'pending'
-    });
+    }).maxTimeMS(8000);
 
     if (!request) {
       return res.status(404).json({ message: 'Friend request not found' });
@@ -159,7 +159,7 @@ exports.unfriend = async (req, res) => {
         { requester: userId1, recipient: userId2, status: 'accepted' },
         { requester: userId2, recipient: userId1, status: 'accepted' }
       ]
-    });
+    }).maxTimeMS(8000);
 
     if (!friendship) {
       return res.status(404).json({ message: 'Friendship not found' });
@@ -181,7 +181,7 @@ exports.getFriendsList = async (req, res) => {
     const friendships = await Friendship.find({
       $or: [{ requester: targetUserId }, { recipient: targetUserId }],
       status: 'accepted'
-    }).populate('requester recipient', 'firstName lastName avatar emailOrPhone isOnline lastSeen gender').lean();
+    }).populate('requester recipient', 'firstName lastName avatar emailOrPhone isOnline lastSeen gender').maxTimeMS(8000).lean();
 
     // If viewing someone else's friend list, check which of those friends the requester is actually friends with
     let currentUserFriendIds = new Set();
@@ -274,7 +274,7 @@ exports.getPendingRequests = async (req, res) => {
     const requests = await Friendship.find({
       recipient: currentUserId,
       status: 'pending'
-    }).populate('requester', 'firstName lastName avatar gender').lean();
+    }).populate('requester', 'firstName lastName avatar gender').maxTimeMS(8000).lean();
 
     const formattedRequests = requests.map(f => ({
       requestId: f._id,
@@ -290,16 +290,24 @@ exports.getPendingRequests = async (req, res) => {
 
     res.status(200).json({ requests: formattedRequests });
   } catch (error) {
-    console.error(error);
+    console.error('getPendingRequests error:', error);
+    if (error.name === 'MongoNetworkTimeoutError' || error.name === 'MongoServerSelectionError' || error.code === 'ETIMEDOUT') {
+      return res.status(503).json({ message: 'Database temporarily unavailable. Please try again.' });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 // Get All Users (for testing / discovering friends / searching)
 exports.getAllUsers = async (req, res) => {
   try {
     const currentUserId = req.user._id;
     const search = req.query.search || req.query.q;
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const requestedLimit = parseInt(req.query.limit, 10) || (search ? 20 : 30);
+    const limit = Math.min(Math.max(requestedLimit, 1), search ? 20 : 50);
+    const skip = (page - 1) * limit;
 
     const query = { _id: { $ne: currentUserId } };
 
@@ -314,20 +322,28 @@ exports.getAllUsers = async (req, res) => {
     // Get all users except current user (limited to 20 if searching, else 100)
     const users = await User.find(query)
       .select('firstName lastName avatar isOnline lastSeen isPublicProfile gender isVerified')
-      .limit(search ? 20 : 100)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .maxTimeMS(8000)
       .lean();
 
     // Optionally attach relationship status to each user
     const friendships = await Friendship.find({
       $or: [{ requester: currentUserId }, { recipient: currentUserId }]
-    }).lean();
+    }).select('requester recipient status').maxTimeMS(8000).lean();
+
+    const friendshipByUserId = new Map();
+    friendships.forEach(fr => {
+      const otherId = fr.requester.toString() === currentUserId.toString()
+        ? fr.recipient.toString()
+        : fr.requester.toString();
+      friendshipByUserId.set(otherId, fr);
+    });
 
     const formattedUsers = users.map(u => {
       let status = 'none';
-      const f = friendships.find(fr => 
-        (fr.requester.toString() === u._id.toString() && fr.recipient.toString() === currentUserId.toString()) ||
-        (fr.recipient.toString() === u._id.toString() && fr.requester.toString() === currentUserId.toString())
-      );
+      const f = friendshipByUserId.get(u._id.toString());
       
       if (f) {
         if (f.status === 'accepted') status = 'friends';
@@ -350,9 +366,16 @@ exports.getAllUsers = async (req, res) => {
       };
     });
 
-    res.status(200).json({ users: formattedUsers });
+    res.status(200).json({
+      users: formattedUsers,
+      page,
+      hasMore: users.length === limit
+    });
   } catch (error) {
-    console.error(error);
+    console.error('getAllUsers error:', error);
+    if (error.name === 'MongoNetworkTimeoutError' || error.name === 'MongoServerSelectionError' || error.code === 'ETIMEDOUT') {
+      return res.status(503).json({ message: 'Database temporarily unavailable. Please try again.' });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 };

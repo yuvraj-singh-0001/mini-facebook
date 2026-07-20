@@ -3,6 +3,16 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
+mongoose.set('bufferCommands', false);
+
+// Global error handlers - server ko crash hone se bachao
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION (server will not crash):', err.message);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('UNHANDLED REJECTION (server will not crash):', reason);
+});
+
 const authRoutes = require('./src/routes/router');
 const http = require('http');
 const setupSocket = require('./src/socket');
@@ -32,11 +42,38 @@ app.use(cors({
   },
   credentials: true
 }));
-app.use(express.json({ limit: '500mb' }));
-app.use(express.urlencoded({ limit: '500mb', extended: true }));
+const BODY_LIMIT = process.env.BODY_LIMIT || '30mb';
+app.use(express.json({ limit: BODY_LIMIT }));
+app.use(express.urlencoded({ limit: BODY_LIMIT, extended: true }));
+
+function requireDbConnection(req, res, next) {
+  const state = mongoose.connection.readyState;
+  // 1 = connected, 2 = connecting (wait briefly)
+  if (state === 1) return next();
+  if (state === 2) {
+    // DB is still connecting (server just started) — wait up to 5s
+    const startWait = Date.now();
+    const poll = setInterval(() => {
+      if (mongoose.connection.readyState === 1) {
+        clearInterval(poll);
+        return next();
+      }
+      if (Date.now() - startWait > 5000) {
+        clearInterval(poll);
+        return res.status(503).json({
+          message: 'Database connection is not ready. Please retry in a moment.'
+        });
+      }
+    }, 200);
+  } else {
+    return res.status(503).json({
+      message: 'Database connection is not ready. Please retry in a moment.'
+    });
+  }
+}
 
 // Routes
-app.use('/api', authRoutes);
+app.use('/api', requireDbConnection, authRoutes);
 
 // Test Route
 app.get('/', (req, res) => {
@@ -48,16 +85,27 @@ server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+// MongoDB connection event listeners
+mongoose.connection.on('disconnected', () => {
+  console.warn('MongoDB disconnected - queries will fail until reconnected');
+});
+mongoose.connection.on('reconnected', () => {
+  console.log('MongoDB reconnected successfully');
+});
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err.message);
+});
+
 // Database connection
 // (MongoDB Atlas connection)
 const BadWord = require('./src/models/BadWord');
 
 mongoose.connect(process.env.MONGODB_URI, {
-  maxPoolSize: 20,
-  minPoolSize: 5,
-  socketTimeoutMS: 60000,
-  connectTimeoutMS: 30000,
-  serverSelectionTimeoutMS: 10000,
+  maxPoolSize: 10,
+  minPoolSize: 2,
+  socketTimeoutMS: 25000,      // 25 sec - Atlas slow queries handle karo
+  connectTimeoutMS: 20000,     // 20 sec initial connect timeout
+  serverSelectionTimeoutMS: 15000, // 15 sec server select timeout
   heartbeatFrequencyMS: 10000,
   retryWrites: true,
   retryReads: true,

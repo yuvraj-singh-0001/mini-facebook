@@ -6,7 +6,10 @@ exports.login = async (req, res) => {
     const { emailOrPhone, password } = req.body;
 
     // Find user
-    const user = await User.findOne({ emailOrPhone }).lean();
+    const user = await User.findOne({ emailOrPhone })
+      .select('firstName lastName emailOrPhone password avatar bio workplace education location hometown relationshipStatus isPublicProfile gender createdAt isDeactivated deactivatedUntil')
+      .maxTimeMS(10000)
+      .lean();
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -54,7 +57,10 @@ exports.login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error('login error:', error);
+    if (error.name === 'MongoNetworkTimeoutError' || error.name === 'MongoServerSelectionError' || error.code === 'ETIMEDOUT') {
+      return res.status(503).json({ message: 'Database temporarily unavailable. Please try again.' });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 };

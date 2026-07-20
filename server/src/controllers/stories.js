@@ -41,6 +41,8 @@ exports.getFeedStories = async (req, res) => {
       expiresAt: { $gt: new Date() }
     })
     .sort({ createdAt: 1 }) // oldest active first per user looks better in story viewer, but we group them anyway
+    .limit(100)
+    .maxTimeMS(8000)
     .populate('user', 'firstName lastName avatar gender')
     .lean();
 
@@ -101,7 +103,7 @@ exports.viewStory = async (req, res) => {
     await Story.findOneAndUpdate(
       { _id: storyId, user: { $ne: userId } },
       { $addToSet: { viewers: userId } }
-    );
+    ).maxTimeMS(5000);
 
     res.status(200).json({ message: 'Story viewed' });
   } catch (error) {
@@ -115,24 +117,23 @@ exports.likeStory = async (req, res) => {
     const storyId = req.params.storyId;
     const userId = req.user._id;
 
-    const story = await Story.findById(storyId);
+    const story = await Story.findById(storyId).select('user likes').maxTimeMS(5000);
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
     const hasLiked = story.likes.some(id => id.toString() === userId.toString());
 
     if (!hasLiked) {
-      story.likes.push(userId);
-      await story.save();
+      await Story.updateOne({ _id: storyId }, { $addToSet: { likes: userId } }).maxTimeMS(5000);
 
       if (story.user.toString() !== userId.toString()) {
-        const senderUser = await require('../models/User').findById(userId).lean();
-        await new (require('../models/Notification'))({
+        const senderUser = req.user;
+        require('../models/Notification').create({
           recipient: story.user,
           sender: userId,
           type: 'like',
-          referenceId: story._id,
+          referenceId: storyId,
           message: `${senderUser.firstName} ${senderUser.lastName} liked your story.`
-        }).save();
+        }).catch(err => console.error('Story like notification failed:', err.message));
       }
     }
 
@@ -151,6 +152,7 @@ exports.getStoryStats = async (req, res) => {
     const story = await Story.findById(storyId)
       .populate('viewers', 'firstName lastName avatar')
       .populate('likes', 'firstName lastName avatar')
+      .maxTimeMS(8000)
       .lean();
 
     if (!story) return res.status(404).json({ message: 'Story not found' });
